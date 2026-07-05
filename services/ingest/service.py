@@ -24,9 +24,9 @@ from adapters.feishu import FeishuBitableClient, make_feishu_client
 from adapters.ffmpeg import probe_metadata
 from adapters.onedrive import OneDriveClient, get_onedrive_client
 from app.config import get_settings
-from core.enums import MaterialRole
 from core.feishu_fields import MATERIAL_FIELDS
 from core.models import VideoMetadata
+from core.roles import parse_roles  # noqa: F401  (re-export for backward compat)
 
 
 class IngestService:
@@ -164,17 +164,6 @@ class IngestService:
         if not name:
             raise RuntimeError(f"素材表缺少字段: {key} (候选 {MATERIAL_FIELDS[key]})")
         return name
-
-
-def parse_roles(value: str) -> list[MaterialRole]:
-    """把“HOOK / CTA / PROOF”解析成角色列表（供后续选材用）。"""
-    roles: list[MaterialRole] = []
-    for token in str(value).replace("，", "/").replace(",", "/").split("/"):
-        token = token.strip().upper()
-        for role in MaterialRole:
-            if role.value == token and role not in roles:
-                roles.append(role)
-    return roles
 
 
 @lru_cache

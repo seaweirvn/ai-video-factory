@@ -138,13 +138,14 @@ class OneDriveClient:
         return "u!" + encoded.rstrip("=")
 
     # ---------- 上传 + 分享 ----------
-    def upload_and_share(self, local_path: Path) -> str:
+    def upload_and_share(self, local_path: Path, target_folder: str | None = None) -> str:
         local_path = Path(local_path)
         if not local_path.exists():
             raise FileNotFoundError(f"待上传文件不存在: {local_path}")
-        return asyncio.run(self._upload_and_share_async(local_path))
+        folder = "/" + target_folder.strip("/") if target_folder else self.target_folder
+        return asyncio.run(self._upload_and_share_async(local_path, folder))
 
-    async def _upload_and_share_async(self, local_path: Path) -> str:
+    async def _upload_and_share_async(self, local_path: Path, target_folder: str) -> str:
         from msgraph import GraphServiceClient
         from msgraph.generated.drives.item.items.item.create_upload_session.create_upload_session_post_request_body import (
             CreateUploadSessionPostRequestBody,
@@ -155,7 +156,7 @@ class OneDriveClient:
         )
         from msgraph_core.tasks import LargeFileUploadTask
 
-        credential = self._build_credential()
+        credential = self._get_credential()
         client = GraphServiceClient(credentials=credential, scopes=self.scopes)
 
         drive = await client.me.drive.get()
@@ -163,7 +164,7 @@ class OneDriveClient:
             raise RuntimeError("无法获取 OneDrive drive，请确认账号已授权")
         drive_id = drive.id
 
-        item_path = f"root:{self.target_folder}/{local_path.name}:"
+        item_path = f"root:{target_folder}/{local_path.name}:"
         upload_props = DriveItemUploadableProperties(
             additional_data={"@microsoft.graph.conflictBehavior": "replace"}
         )

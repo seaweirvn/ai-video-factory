@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     onedrive_token_cache_name: str = "ai_video_onedrive_cache"
     onedrive_link_type: str = "view"
     onedrive_link_scope: str = "anonymous"
+    # 成片上传到的 OneDrive 目录（与素材目录分开）
+    onedrive_render_folder: str = "/04.AI Center/KOL VIDEO/03.VN/_AI_Renders"
 
     # 引擎参数
     perf_weight_completion: float = 0.30
@@ -62,6 +64,9 @@ class Settings(BaseSettings):
     perf_weight_gmv: float = 0.30
     selection_epsilon_start: float = 0.30
     selection_epsilon_floor: float = 0.10
+    # 成片目标时长与允许的超出比例（flexible 选材用）
+    selection_target_duration_sec: float = 25.0
+    selection_max_overshoot: float = 1.25
     scoring_shrink_k: float = 5.0
     scoring_optimistic_init: float = 0.60
 

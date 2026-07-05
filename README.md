@@ -51,9 +51,13 @@ docker compose up -d
 
 ## 开发阶段
 
-- 阶段 0（当前）：项目骨架、FastAPI、配置/日志、飞书与 OneDrive adapter、异步 job、Docker。
-- 阶段 1：素材摄取 + 元数据回写。
-- 阶段 2：智能选材 + 剪辑 MVP + 成片-素材映射。
+- 阶段 0（已完成）：项目骨架、FastAPI、配置/日志、飞书与 OneDrive adapter、异步 job、Docker。
+- 阶段 1（已完成）：素材摄取 + 元数据回写。
+- 阶段 2（进行中）：智能选材 + 剪辑 MVP + 成片-素材映射。
+  - 选材（flexible）：`POST /selection/plan`，HOOK+CTA 必选、VALUE/PROOF 按目标时长凑。
+  - 剪辑：`POST /edit/render`（异步 job），下载片段 → ffmpeg 归一化拼接 → 本地成片 →(可选)上传 OneDrive。
+  - 成片-素材映射落地 `data/renders/<name>.json`（供阶段 6 归因）。
+  - 待办：成片表回写（需飞书成片表 ID）。
 - 阶段 3：AI 文案。
 - 阶段 4：排期 + 发布。
 - 阶段 5：数据回收。

@@ -21,21 +21,43 @@ class Material(BaseModel):
     """素材库中的一条素材。"""
 
     record_id: str
+    material_id: str = ""
     product_model: str = ""
-    role: MaterialRole | None = None
+    roles: list[MaterialRole] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
     onedrive_link: str = ""
+    duration_sec: float = 0.0
     score: float | None = None
     enabled: bool = True
-    metadata: VideoMetadata | None = None
+
+    def has_role(self, role: MaterialRole) -> bool:
+        return role in self.roles
 
 
-class RenderPlanItem(BaseModel):
-    """选材引擎输出的一个成片计划：按角色挑选的素材序列。"""
+class RenderClip(BaseModel):
+    """成片计划中的一个片段：某条素材以某个角色被使用。"""
+
+    record_id: str
+    material_id: str = ""
+    role_used: MaterialRole
+    onedrive_link: str = ""
+    duration_sec: float = 0.0
+
+
+class RenderPlan(BaseModel):
+    """选材引擎输出的一个成片计划：有序片段序列。"""
 
     product_model: str = ""
-    slots: dict[MaterialRole, str] = Field(default_factory=dict)  # role -> material record_id
-    target_duration_sec: float | None = None
+    clips: list[RenderClip] = Field(default_factory=list)
+    target_duration_sec: float = 0.0
+
+    @property
+    def total_duration_sec(self) -> float:
+        return round(sum(c.duration_sec for c in self.clips), 2)
+
+    @property
+    def material_ids(self) -> list[str]:
+        return [c.material_id for c in self.clips]
 
 
 class PublishTask(BaseModel):
