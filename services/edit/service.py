@@ -18,11 +18,12 @@ from pathlib import Path
 from loguru import logger
 
 from adapters.feishu import FeishuBitableClient, make_feishu_client
-from adapters.ffmpeg import concat_clips
+from adapters.ffmpeg import compose_with_voiceover, concat_clips
 from adapters.onedrive import OneDriveClient, get_onedrive_client
 from app.config import get_settings
 from core.feishu_fields import RENDER_FIELD_TYPES, RENDER_FIELDS
 from core.models import RenderPlan
+from services.voiceover import VoiceoverAsset
 
 
 @dataclass
@@ -35,6 +36,9 @@ class RenderResult:
     clips: list[dict] = field(default_factory=list)
     mapping_path: str = ""
     feishu_record_id: str = ""
+    voiceover: bool = False
+    script: list[str] = field(default_factory=list)
+    subtitle_language: str = ""
 
 
 class EditService:
@@ -61,6 +65,8 @@ class EditService:
         plan: RenderPlan,
         name: str | None = None,
         upload: bool = False,
+        voiceover: VoiceoverAsset | None = None,
+        kept_volume: float = 0.7,
         progress=None,
     ) -> RenderResult:
         if not plan.clips:
@@ -82,7 +88,25 @@ class EditService:
 
             if progress:
                 progress(0.65)
-            concat_clips(local_clips, output, tmp_dir=work / "_concat")
+            if voiceover is not None:
+                # 配音驱动：音轨=配音+勾选片段原声，烧字幕，裁到配音时长
+                compose_clips = [
+                    {"path": local_clips[i], "keep_original": plan.clips[i].keep_original}
+                    for i in range(total)
+                ]
+                compose_with_voiceover(
+                    compose_clips,
+                    voiceover_audio=Path(voiceover.audio_path),
+                    output=output,
+                    duration=voiceover.total_duration,
+                    srt=Path(voiceover.srt_path) if voiceover.srt_path else None,
+                    kept_volume=kept_volume,
+                    tmp_dir=work / "_vo",
+                )
+                out_duration = voiceover.total_duration
+            else:
+                concat_clips(local_clips, output, tmp_dir=work / "_concat")
+                out_duration = plan.total_duration_sec
 
             onedrive_link = ""
             if upload:
@@ -97,6 +121,7 @@ class EditService:
                     "material_id": c.material_id,
                     "role_used": c.role_used.value,
                     "duration_sec": c.duration_sec,
+                    "keep_original": c.keep_original,
                     "onedrive_link": c.onedrive_link,
                 }
                 for i, c in enumerate(plan.clips)
@@ -105,9 +130,12 @@ class EditService:
                 name=name,
                 product_model=plan.product_model,
                 output_path=str(output.resolve()),
-                duration_sec=plan.total_duration_sec,
+                duration_sec=round(out_duration, 2),
                 onedrive_link=onedrive_link,
                 clips=clips_meta,
+                voiceover=voiceover is not None,
+                script=voiceover.script if voiceover else [],
+                subtitle_language=voiceover.language if voiceover else "",
             )
             result.mapping_path = self._persist_mapping(result)
 
@@ -130,7 +158,10 @@ class EditService:
         """把成片写入飞书成片表；缺列自动创建（方便扩展到其他国家表）。"""
         f = self.render_feishu
         tid = self.render_table_id
-        materials = ", ".join(f"{c.material_id}({c.role_used.value})" for c in plan.clips)
+        materials = ", ".join(
+            f"{c.material_id}({c.role_used.value}{'+原声' if c.keep_original else ''})"
+            for c in plan.clips
+        )
         values = {
             "render_id": result.name,
             "product_model": plan.product_model,
@@ -138,6 +169,9 @@ class EditService:
             "duration": result.duration_sec,
             "status": "rendered",
             "materials": materials,
+            "voiceover": result.voiceover,
+            "script": "\n".join(result.script),
+            "subtitle_language": result.subtitle_language,
         }
         fields: dict = {}
         for key, val in values.items():

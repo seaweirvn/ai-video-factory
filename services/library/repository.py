@@ -33,6 +33,7 @@ class MaterialRepository:
         dur_field = f.resolve_field(tid, MATERIAL_FIELDS["duration"])
         main_tag_field = f.resolve_field(tid, MATERIAL_FIELDS["main_tag"])
         aux_tag_field = f.resolve_field(tid, MATERIAL_FIELDS["aux_tags"])
+        keep_field = f.resolve_field(tid, MATERIAL_FIELDS["keep_original"])
 
         materials: list[Material] = []
         for record in f.list_records(tid, text_field_as_array=True):
@@ -44,6 +45,7 @@ class MaterialRepository:
             roles = parse_roles(f.cell_text(fields.get(role_field))) if role_field else []
             tags = _split_tags(f.cell_text(fields.get(main_tag_field)) if main_tag_field else "")
             tags += _split_tags(f.cell_text(fields.get(aux_tag_field)) if aux_tag_field else "")
+            keep_original = bool(fields.get(keep_field)) if keep_field else False
             materials.append(
                 Material(
                     record_id=record.get("record_id", ""),
@@ -53,6 +55,7 @@ class MaterialRepository:
                     tags=tags,
                     onedrive_link=link,
                     duration_sec=duration,
+                    keep_original_audio=keep_original,
                 )
             )
         logger.info("加载素材 {} 条（only_ready={}）", len(materials), only_ready)

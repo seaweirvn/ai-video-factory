@@ -21,6 +21,8 @@ MATERIAL_FIELDS = {
     "duration": ["单条时长（毫秒）", "单条时长", "时长", "Duration"],
     # 是否已读取时长（完成标记）
     "duration_read": ["读取时长", "已读取时长"],
+    # 配音模式下：勾选则该素材片段“配音+原声”同时保留，否则只用配音
+    "keep_original": ["保留原声"],
     "date": ["日期", "Date"],
 }
 
@@ -35,6 +37,9 @@ RENDER_FIELDS = {
     "title": ["标题", "Title"],
     "caption": ["文案", "Caption"],
     "tags": ["标签", "Tags"],
+    "voiceover": ["是否配音", "Voiceover"],
+    "script": ["口播脚本", "Script"],
+    "subtitle_language": ["字幕语言", "Subtitle Language"],
 }
 
 # 成片表各列的 ui_type（新建列时用）
@@ -48,6 +53,9 @@ RENDER_FIELD_TYPES = {
     "title": "text",
     "caption": "text",
     "tags": "text",
+    "voiceover": "checkbox",
+    "script": "text",
+    "subtitle_language": "text",
 }
 
 # 发布表

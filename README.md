@@ -61,6 +61,9 @@ docker compose up -d
 - 阶段 3（已完成）：AI 文案。
   - `POST /content/render`：聚合成片所用素材的标签，生成标题/文案/标签并写回成片表 `标题/文案/标签` 列。
   - Provider 可切换：`OPENAI_API_KEY` 配置后走 OpenAI 兼容接口（`vi` 越南语），未配置时模板兜底跑通链路。
+- 配音驱动剪辑（可选，`voiceover.enabled`；需 `OPENAI_API_KEY`）：
+  - 生成口播脚本 -> OpenAI TTS 逐句合成配音 + 句级字幕(SRT) -> 用配音时长驱动选材 -> 音轨按素材「保留原声」逐段决定（勾选=配音+原声混音，未勾=只配音）-> 烧录字幕 -> 裁到配音时长。
+  - 默认关闭，不影响原声拼接流程。`POST /edit/render` 传 `voiceover.enabled=true` 启用。
 - 阶段 4：排期 + 发布。
 - 阶段 5：数据回收。
 - 阶段 6：归因 + 评分闭环。

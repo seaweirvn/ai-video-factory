@@ -125,6 +125,7 @@ class SelectionService:
             role_used=role,
             onedrive_link=material.onedrive_link,
             duration_sec=material.duration_sec,
+            keep_original=material.keep_original_audio,
         )
 
 

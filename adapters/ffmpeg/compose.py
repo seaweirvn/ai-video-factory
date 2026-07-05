@@ -99,9 +99,129 @@ def concat_clips(clips: list[Path], output: Path, tmp_dir: Path | None = None) -
         shutil.rmtree(work, ignore_errors=True)
 
 
-def _run(cmd: list[str], desc: str) -> None:
+def compose_with_voiceover(
+    clips: list[dict],
+    voiceover_audio: Path,
+    output: Path,
+    duration: float,
+    srt: Path | None = None,
+    kept_volume: float = 0.7,
+    width: int = 1080,
+    height: int = 1920,
+    fps: int = 30,
+    tmp_dir: Path | None = None,
+) -> Path:
+    """配音驱动合成。
+
+    clips: 每片 {"path": 源文件, "keep_original": bool}，按顺序拼接。
+    音轨 = 配音(主) + 所有 keep_original 片段的原声(按其时间轴起点延迟、压低音量)混音；
+    未勾选片段丢弃原声。烧录 srt 字幕，输出裁到 duration。
+    """
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    work = Path(tmp_dir or output.parent / "_vo_tmp")
+    work.mkdir(parents=True, exist_ok=True)
+
+    try:
+        normalized: list[Path] = []
+        starts: list[float] = []
+        cursor = 0.0
+        for i, clip in enumerate(clips):
+            norm = normalize_clip(Path(clip["path"]), work / f"norm_{i:03d}.mp4", width, height, fps)
+            normalized.append(norm)
+            starts.append(cursor)
+            cursor += _media_duration(norm)
+
+        subs_name = ""
+        if srt is not None:
+            subs_name = "subs.srt"
+            shutil.copyfile(srt, work / subs_name)
+
+        n = len(normalized)
+        vo_idx = n
+        parts: list[str] = []
+        # 视频：concat 后（可选）烧字幕
+        parts.append("".join(f"[{i}:v]" for i in range(n)) + f"concat=n={n}:v=1:a=0[vcat];")
+        if subs_name:
+            style = "force_style='Alignment=2,MarginV=60,Fontsize=16,Outline=1,Shadow=0'"
+            parts.append(f"[vcat]subtitles={subs_name}:{style}[v];")
+        else:
+            parts.append("[vcat]null[v];")
+        # 音频：配音主轨 + 保留原声片段
+        parts.append(f"[{vo_idx}:a]aresample=44100[vo];")
+        audio_labels = ["[vo]"]
+        for i, clip in enumerate(clips):
+            if not clip.get("keep_original"):
+                continue
+            ms = int(round(starts[i] * 1000))
+            parts.append(f"[{i}:a]adelay={ms}|{ms},volume={kept_volume}[a{i}];")
+            audio_labels.append(f"[a{i}]")
+        if len(audio_labels) == 1:
+            final_audio = "[vo]"
+        else:
+            parts.append("".join(audio_labels) + f"amix=inputs={len(audio_labels)}:normalize=0[a];")
+            final_audio = "[a]"
+
+        filter_complex = "".join(parts)
+        cmd = [_ffmpeg(), "-y"]
+        for norm in normalized:
+            cmd += ["-i", str(norm.resolve())]
+        cmd += ["-i", str(Path(voiceover_audio).resolve())]
+        cmd += [
+            "-filter_complex", filter_complex,
+            "-map", "[v]", "-map", final_audio,
+            "-t", f"{duration:.3f}",
+            "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-ar", "44100", "-ac", "2", "-b:a", "128k",
+            "-video_track_timescale", "30000",
+            str(output.resolve()),
+        ]
+        _run(cmd, f"配音合成 {n} 段 -> {output.name}", cwd=work)
+        return output
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def _media_duration(path: Path) -> float:
+    ffprobe = shutil.which("ffprobe")
+    if not ffprobe:
+        return 0.0
+    result = subprocess.run(
+        [ffprobe, "-v", "error", "-show_entries", "format=duration",
+         "-of", "default=noprint_wrappers=1:nokey=1", str(path)],
+        capture_output=True, text=True, check=False,
+    )
+    try:
+        return float(result.stdout.strip())
+    except ValueError:
+        return 0.0
+
+
+def concat_audio(clips: list[Path], output: Path) -> Path:
+    """把多段音频（同格式 wav）顺序拼接为一段（配音用）。"""
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    list_file = output.parent / f"{output.stem}_alist.txt"
+    list_file.write_text(
+        "\n".join(f"file '{Path(p).resolve().as_posix()}'" for p in clips),
+        encoding="utf-8",
+    )
+    cmd = [
+        _ffmpeg(), "-y", "-f", "concat", "-safe", "0", "-i", str(list_file),
+        "-c:a", "pcm_s16le", "-ar", "44100", "-ac", "2", str(output),
+    ]
+    try:
+        _run(cmd, f"拼接配音 {len(clips)} 段 -> {output.name}")
+    finally:
+        list_file.unlink(missing_ok=True)
+    return output
+
+
+def _run(cmd: list[str], desc: str, cwd: Path | None = None) -> None:
     logger.info("ffmpeg {} ...", desc)
-    result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    result = subprocess.run(
+        cmd, capture_output=True, text=True, check=False, cwd=str(cwd) if cwd else None
+    )
     if result.returncode != 0:
         tail = (result.stderr or "")[-800:]
         raise RuntimeError(f"ffmpeg 失败({desc}): {tail}")

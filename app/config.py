@@ -79,6 +79,16 @@ class Settings(BaseSettings):
     openai_base_url: str = "https://api.openai.com/v1"
     openai_model: str = "gpt-4o-mini"
 
+    # 配音（TTS）+ 字幕；默认关闭，配音需要 openai_api_key
+    openai_tts_model: str = "gpt-4o-mini-tts"
+    tts_voice: str = "alloy"
+    voiceover_enabled_default: bool = False
+    voiceover_subtitle_default: bool = True
+    # “保留原声”片段里，原声混入时的音量（0~1，压低以保证配音清晰）
+    voiceover_kept_original_volume: float = 0.7
+    # 选材目标时长在配音时长上加的余量（秒），保证画面覆盖配音
+    voiceover_tail_margin_sec: float = 1.5
+
     def ensure_dirs(self) -> None:
         for path in (self.workspace_dir, self.log_dir, self.data_dir):
             Path(path).mkdir(parents=True, exist_ok=True)

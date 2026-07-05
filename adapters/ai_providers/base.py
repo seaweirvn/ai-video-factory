@@ -30,6 +30,17 @@ class ContentProvider(ABC):
     ) -> dict:
         """返回 {title, caption, tags}。"""
 
+    @abstractmethod
+    def generate_script(
+        self,
+        product_model: str,
+        tags: list[str],
+        language: str = "vi",
+        *,
+        target_sec: float = 25.0,
+    ) -> list[str]:
+        """生成口播脚本，返回分句列表（用于逐句 TTS + 句级字幕）。"""
+
 
 class TemplateContentProvider(ContentProvider):
     """免密钥模板兜底：用产品 + 标签拼装标题/文案/标签，接入真实 AI 前先跑通。"""
@@ -52,6 +63,22 @@ class TemplateContentProvider(ContentProvider):
         title = f"{product_model} {' '.join(clean_tags[:2])}".strip()
         caption = f"{product_model} {' '.join(hashtags)}".strip()
         return {"title": title, "caption": caption, "tags": [h.lstrip('#') for h in hashtags]}
+
+    def generate_script(
+        self,
+        product_model: str,
+        tags: list[str],
+        language: str = "vi",
+        *,
+        target_sec: float = 25.0,
+    ) -> list[str]:
+        # 免密钥兜底：无法产出地道口播稿，用产品+标签拼几句占位（真正配音需接 AI）。
+        clean_tags = [t.strip().lstrip("#") for t in tags if t and t.strip()]
+        lines = [f"{product_model}"]
+        if clean_tags:
+            lines.append(" ".join(clean_tags[:3]))
+        lines.append(product_model)
+        return [ln for ln in lines if ln]
 
 
 def _to_hashtag(tag: str) -> str:

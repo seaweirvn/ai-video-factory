@@ -27,6 +27,7 @@ class Material(BaseModel):
     tags: list[str] = Field(default_factory=list)
     onedrive_link: str = ""
     duration_sec: float = 0.0
+    keep_original_audio: bool = False
     score: float | None = None
     enabled: bool = True
 
@@ -42,6 +43,7 @@ class RenderClip(BaseModel):
     role_used: MaterialRole
     onedrive_link: str = ""
     duration_sec: float = 0.0
+    keep_original: bool = False
 
 
 class RenderPlan(BaseModel):
