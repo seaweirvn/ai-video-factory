@@ -64,7 +64,11 @@ docker compose up -d
 - 配音驱动剪辑（可选，`voiceover.enabled`；需 `OPENAI_API_KEY`）：
   - 生成口播脚本 -> OpenAI TTS 逐句合成配音 + 句级字幕(SRT) -> 用配音时长驱动选材 -> 音轨按素材「保留原声」逐段决定（勾选=配音+原声混音，未勾=只配音）-> 烧录字幕 -> 裁到配音时长。
   - 默认关闭，不影响原声拼接流程。`POST /edit/render` 传 `voiceover.enabled=true` 启用。
-- 阶段 4：排期 + 发布。
+- 阶段 4（进行中）：排期 + 发布。
+  - 排期引擎：成片按账号分配，每账号每天 3~5 条，白天(默认 9-21)错峰随机时间。
+  - `POST /publish/schedule` 生成发布计划(落 `data/publish/<date>.json`)，`POST /publish/run` 到点执行，`GET /publish/items` 看状态。
+  - 发布器可切换：配置第三方聚合工具(`PUBLISH_BASE_URL/API_KEY`)后走真实发布，未配置用 stub 只记录。
+  - 待办：接第三方工具真实发布 + 发布表/账号表(待用户提供 ID)。
 - 阶段 5：数据回收。
 - 阶段 6：归因 + 评分闭环。
 - 阶段 7：自愈/规模化 + 多平台/AI 扩展。

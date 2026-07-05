@@ -89,6 +89,17 @@ class Settings(BaseSettings):
     # 选材目标时长在配音时长上加的余量（秒），保证画面覆盖配音
     voiceover_tail_margin_sec: float = 1.5
 
+    # 发布（第三方聚合工具；未配置时用 stub 只记录不真发）
+    publish_provider: str = "auto"  # auto | thirdparty | stub
+    publish_base_url: str = ""
+    publish_api_key: str = ""
+    publish_platform: str = "tiktok"
+    # 每账号每天发布条数区间与白天错峰时段（小时）
+    publish_per_account_min: int = 3
+    publish_per_account_max: int = 5
+    publish_window_start_hour: int = 9
+    publish_window_end_hour: int = 21
+
     def ensure_dirs(self) -> None:
         for path in (self.workspace_dir, self.log_dir, self.data_dir):
             Path(path).mkdir(parents=True, exist_ok=True)
