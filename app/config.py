@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     feishu_vn_app_id: str = ""
     feishu_vn_app_secret: str = ""
     feishu_vn_bitable_app_token: str = ""
+    # 素材库在“营销”知识库多维表格下，app_token 与主 bitable 不同
+    feishu_vn_material_app_token: str = ""
     feishu_vn_material_table_id: str = ""
     feishu_vn_render_table_id: str = ""
     feishu_vn_publish_table_id: str = ""

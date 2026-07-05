@@ -45,8 +45,15 @@ class OneDriveClient:
         self.scopes = [s.strip() for s in scopes.split(",") if s.strip()]
         self.link_type = link_type
         self.link_scope = link_scope
+        self._credential = None
 
     # ---------- 凭据 ----------
+    def _get_credential(self):
+        """构建一次并复用；azure-identity 会在实例内缓存/静默刷新 token。"""
+        if self._credential is None:
+            self._credential = self._build_credential()
+        return self._credential
+
     def _build_credential(self):
         from azure.identity import (
             AuthenticationRecord,
@@ -87,7 +94,7 @@ class OneDriveClient:
         return credential
 
     def _access_token(self) -> str:
-        credential = self._build_credential()
+        credential = self._get_credential()
         token = credential.get_token(*self.scopes)
         return token.token
 
@@ -107,6 +114,23 @@ class OneDriveClient:
                         fh.write(chunk)
         logger.info("下载完成 - {} ({} 字节)", dest_path, dest_path.stat().st_size)
         return dest_path
+
+    def get_share_item_metadata(self, share_url: str) -> dict:
+        """按分享链接读取 driveItem 元数据（含 video facet：时长/分辨率/FPS/音频）。
+
+        不下载文件本体，只取元数据，适合大批量素材快速读时长。
+        """
+        share_id = self._encode_share_url(share_url)
+        headers = {"Authorization": f"Bearer {self._access_token()}"}
+        url = f"{_GRAPH_BASE}/shares/{share_id}/driveItem"
+        resp = requests.get(
+            url,
+            headers=headers,
+            params={"$select": "id,name,size,file,video,audio"},
+            timeout=60,
+        )
+        resp.raise_for_status()
+        return resp.json()
 
     @staticmethod
     def _encode_share_url(share_url: str) -> str:

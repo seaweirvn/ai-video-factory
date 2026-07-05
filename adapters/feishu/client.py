@@ -81,12 +81,80 @@ class FeishuBitableClient:
                 return candidate
         return None
 
+    def field_ui_type(self, table_id: str, field_name: str) -> str:
+        field = next(
+            (f for f in self.get_fields(table_id) if f.get("field_name") == field_name), {}
+        )
+        return str(field.get("ui_type") or field.get("uiType") or "").casefold()
+
+    def format_value(self, table_id: str, field_name: str, value: Any) -> Any:
+        """按目标字段的 ui_type 把 Python 值转成飞书可接受的写入格式。"""
+        ui_type = self.field_ui_type(table_id, field_name)
+        if value is None:
+            return value
+        if ui_type in ("number",):
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return value
+        if ui_type in ("checkbox",):
+            return bool(value)
+        if ui_type in ("url",):
+            return {"link": str(value), "text": str(value)}
+        if ui_type in ("text", "singleline", "multiline", "barcode", ""):
+            return str(value)
+        return value
+
+    @staticmethod
+    def cell_link(cell: Any) -> str:
+        """从文本/超链接单元格里取出第一个真实 URL（配合 text_field_as_array=true）。"""
+        if cell is None:
+            return ""
+        if isinstance(cell, str):
+            return cell if cell.startswith("http") else ""
+        if isinstance(cell, dict):
+            return str(cell.get("link") or "")
+        if isinstance(cell, list):
+            for item in cell:
+                if isinstance(item, dict) and item.get("link"):
+                    return str(item["link"])
+            return ""
+        return ""
+
+    @staticmethod
+    def cell_text(cell: Any) -> str:
+        """把飞书单元格值（可能是 str / list / dict）读成纯文本。"""
+        if cell is None:
+            return ""
+        if isinstance(cell, str):
+            return cell
+        if isinstance(cell, (int, float, bool)):
+            return str(cell)
+        if isinstance(cell, dict):
+            for key in ("text", "link", "name"):
+                if key in cell:
+                    return str(cell[key])
+            return ""
+        if isinstance(cell, list):
+            parts = [FeishuBitableClient.cell_text(item) for item in cell]
+            return " ".join(p for p in parts if p)
+        return str(cell)
+
     # ---------- 记录 ----------
-    def list_records(self, table_id: str, filter_: str | None = None, page_size: int = 200) -> list[dict[str, Any]]:
+    def list_records(
+        self,
+        table_id: str,
+        filter_: str | None = None,
+        page_size: int = 200,
+        text_field_as_array: bool = False,
+    ) -> list[dict[str, Any]]:
         records: list[dict[str, Any]] = []
         page_token: str | None = None
         while True:
             params: dict[str, Any] = {"page_size": page_size}
+            if text_field_as_array:
+                # 富文本/超链接字段返回分段数组（含 link），否则只拿到纯文本。
+                params["text_field_as_array"] = "true"
             if page_token:
                 params["page_token"] = page_token
             if filter_:
@@ -127,4 +195,18 @@ def get_feishu_client() -> FeishuBitableClient:
         app_id=settings.feishu_vn_app_id,
         app_secret=settings.feishu_vn_app_secret,
         app_token=settings.feishu_vn_bitable_app_token,
+    )
+
+
+@lru_cache
+def make_feishu_client(app_token: str) -> FeishuBitableClient:
+    """为指定 bitable（如素材库所在的“营销”知识库表）构造客户端。
+
+    tenant_access_token 是应用级的，可跨 bitable 复用同一 app_id/secret。
+    """
+    settings = get_settings()
+    return FeishuBitableClient(
+        app_id=settings.feishu_vn_app_id,
+        app_secret=settings.feishu_vn_app_secret,
+        app_token=app_token,
     )

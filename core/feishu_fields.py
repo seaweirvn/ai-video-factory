@@ -6,21 +6,22 @@ adapter 解析时按候选顺序找到真实字段，避免散落硬编码。
 
 from __future__ import annotations
 
-# 素材库表
+# 素材库表（真实列名，位于“营销”知识库多维表格）
 MATERIAL_FIELDS = {
-    "product_model": ["产品型号", "Product Model", "型号"],
-    "role": ["素材位置", "Role", "位置", "HOOK/VALUE/PROOF/CTA"],
-    "tags": ["标签", "Tags"],
-    "onedrive_link": ["ONEDRIVE LINK", "OneDrive Link", "ONEDRIVE_LINK"],
-    "enabled": ["是否启用", "Enabled", "启用"],
-    "status": ["素材状态", "Status", "状态"],
-    "score": ["素材评分", "Score", "评分"],
-    # 视频元数据
-    "duration": ["时长", "Duration", "时长(秒)"],
-    "resolution": ["分辨率", "Resolution"],
-    "fps": ["FPS", "帧率"],
-    "size": ["文件大小", "Size", "大小"],
-    "has_audio": ["是否有音频", "Has Audio", "有音频"],
+    "material_id": ["素材ID", "素材编号"],
+    "product_model": ["产品", "产品型号", "型号", "Product Model"],
+    "onedrive_folder": ["OneDrive文件夹", "OneDrive 文件夹"],
+    "material_type": ["素材类型", "类型"],
+    "content": ["拍摄内容", "内容"],
+    "main_tag": ["主标签"],
+    "aux_tags": ["辅助标签", "标签", "Tags"],
+    "role": ["可用于位置", "素材位置", "Role", "HOOK/VALUE/PROOF/CTA"],
+    "onedrive_link": ["ONEDRIVE链接", "ONEDRIVE LINK", "OneDrive Link", "ONEDRIVE_LINK"],
+    # 单条时长（列名写“毫秒”，但按业务约定实际填“秒”）
+    "duration": ["单条时长（毫秒）", "单条时长", "时长", "Duration"],
+    # 是否已读取时长（完成标记）
+    "duration_read": ["读取时长", "已读取时长"],
+    "date": ["日期", "Date"],
 }
 
 # 成片表

@@ -15,6 +15,10 @@ logs/
 data/*.json
 !data/.gitkeep
 
+# Inspection / temp tool output
+tmp-*.txt
+tmp_*.txt
+
 # OS / IDE
 .DS_Store
 .idea/
