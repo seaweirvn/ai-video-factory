@@ -58,7 +58,9 @@ docker compose up -d
   - 剪辑：`POST /edit/render`（异步 job），下载片段 → ffmpeg 归一化拼接 → 本地成片 →(可选)上传 OneDrive。
   - 成片-素材映射落地 `data/renders/<name>.json`（供阶段 6 归因）。
   - 成片写回飞书成片表（各国家一张表，缺列自动创建；越南表标题“越南”）。
-- 阶段 3：AI 文案。
+- 阶段 3（已完成）：AI 文案。
+  - `POST /content/render`：聚合成片所用素材的标签，生成标题/文案/标签并写回成片表 `标题/文案/标签` 列。
+  - Provider 可切换：`OPENAI_API_KEY` 配置后走 OpenAI 兼容接口（`vi` 越南语），未配置时模板兜底跑通链路。
 - 阶段 4：排期 + 发布。
 - 阶段 5：数据回收。
 - 阶段 6：归因 + 评分闭环。

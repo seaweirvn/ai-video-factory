@@ -72,6 +72,13 @@ class Settings(BaseSettings):
     scoring_shrink_k: float = 5.0
     scoring_optimistic_init: float = 0.60
 
+    # AI 文案（OpenAI 兼容接口；未配置 key 时自动降级为模板兜底）
+    ai_provider: str = "auto"  # auto | openai | null
+    content_language: str = "vi"
+    openai_api_key: str = ""
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_model: str = "gpt-4o-mini"
+
     def ensure_dirs(self) -> None:
         for path in (self.workspace_dir, self.log_dir, self.data_dir):
             Path(path).mkdir(parents=True, exist_ok=True)
