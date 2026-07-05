@@ -1,0 +1,9 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+logs/
+workspace/
+data/onedrive/auth_record.json
+.git/
+.env

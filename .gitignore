@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Env & secrets
+.env
+data/onedrive/auth_record.json
+
+# Runtime artifacts
+workspace/
+logs/
+data/*.json
+!data/.gitkeep
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/

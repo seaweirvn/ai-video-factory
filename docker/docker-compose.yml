@@ -1,0 +1,36 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: aivf-api
+    env_file:
+      - ../.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../workspace:/app/workspace
+      - ../data:/app/data
+      - ../logs:/app/logs
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: aivf-n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - GENERIC_TIMEZONE=Asia/Ho_Chi_Minh
+      # 容器内通过服务名访问 Python API
+      - AIVF_API_BASE=http://api:8000
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ../n8n/workflows:/workflows
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
