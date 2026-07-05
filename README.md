@@ -57,7 +57,7 @@ docker compose up -d
   - 选材（flexible）：`POST /selection/plan`，HOOK+CTA 必选、VALUE/PROOF 按目标时长凑。
   - 剪辑：`POST /edit/render`（异步 job），下载片段 → ffmpeg 归一化拼接 → 本地成片 →(可选)上传 OneDrive。
   - 成片-素材映射落地 `data/renders/<name>.json`（供阶段 6 归因）。
-  - 待办：成片表回写（需飞书成片表 ID）。
+  - 成片写回飞书成片表（各国家一张表，缺列自动创建；越南表标题“越南”）。
 - 阶段 3：AI 文案。
 - 阶段 4：排期 + 发布。
 - 阶段 5：数据回收。

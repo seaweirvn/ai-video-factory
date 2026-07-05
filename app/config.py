@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     # 素材库在“营销”知识库多维表格下，app_token 与主 bitable 不同
     feishu_vn_material_app_token: str = ""
     feishu_vn_material_table_id: str = ""
+    # 成片表（各国家一张表，越南表标题“越南”）
+    feishu_vn_render_app_token: str = ""
     feishu_vn_render_table_id: str = ""
     feishu_vn_publish_table_id: str = ""
     feishu_vn_account_table_id: str = ""

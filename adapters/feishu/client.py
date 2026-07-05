@@ -16,6 +16,18 @@ from app.config import get_settings
 
 _INVALID_TOKEN_CODE = 99991663
 
+# 建字段时 ui_type -> 飞书字段 type 编号
+_UI_TYPE_TO_FIELD_TYPE = {
+    "text": 1,
+    "number": 2,
+    "singleselect": 3,
+    "multiselect": 4,
+    "datetime": 5,
+    "checkbox": 7,
+    "user": 11,
+    "url": 15,
+}
+
 
 class FeishuBitableClient:
     base_url = "https://open.feishu.cn/open-apis"
@@ -80,6 +92,25 @@ class FeishuBitableClient:
             if candidate in names:
                 return candidate
         return None
+
+    def create_field(self, table_id: str, field_name: str, ui_type: str = "text") -> dict[str, Any]:
+        field_type = _UI_TYPE_TO_FIELD_TYPE.get(ui_type.casefold(), 1)
+        payload = self._request(
+            "POST",
+            f"/bitable/v1/apps/{self.app_token}/tables/{table_id}/fields",
+            json={"field_name": field_name, "type": field_type},
+        )
+        self._fields_cache.pop(table_id, None)  # 建完失效缓存，后续 resolve 能看到新列
+        logger.info("飞书新建字段 - {} ({})", field_name, ui_type)
+        return payload.get("data", {}).get("field", {})
+
+    def ensure_field(self, table_id: str, candidates: list[str], ui_type: str = "text") -> str:
+        """字段存在则返回真实名，否则用首选名新建并返回。"""
+        existing = self.resolve_field(table_id, candidates)
+        if existing:
+            return existing
+        self.create_field(table_id, candidates[0], ui_type)
+        return candidates[0]
 
     def field_ui_type(self, table_id: str, field_name: str) -> str:
         field = next(

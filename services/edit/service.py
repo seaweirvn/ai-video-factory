@@ -17,9 +17,11 @@ from pathlib import Path
 
 from loguru import logger
 
+from adapters.feishu import FeishuBitableClient, make_feishu_client
 from adapters.ffmpeg import concat_clips
 from adapters.onedrive import OneDriveClient, get_onedrive_client
 from app.config import get_settings
+from core.feishu_fields import RENDER_FIELD_TYPES, RENDER_FIELDS
 from core.models import RenderPlan
 
 
@@ -32,6 +34,7 @@ class RenderResult:
     onedrive_link: str = ""
     clips: list[dict] = field(default_factory=list)
     mapping_path: str = ""
+    feishu_record_id: str = ""
 
 
 class EditService:
@@ -41,11 +44,15 @@ class EditService:
         workspace_dir: Path,
         data_dir: Path,
         render_folder: str,
+        render_feishu: FeishuBitableClient | None = None,
+        render_table_id: str = "",
     ) -> None:
         self.onedrive = onedrive
         self.renders_dir = Path(workspace_dir) / "renders"
         self.mappings_dir = Path(data_dir) / "renders"
         self.render_folder = render_folder
+        self.render_feishu = render_feishu
+        self.render_table_id = render_table_id
         self.renders_dir.mkdir(parents=True, exist_ok=True)
         self.mappings_dir.mkdir(parents=True, exist_ok=True)
 
@@ -103,12 +110,43 @@ class EditService:
                 clips=clips_meta,
             )
             result.mapping_path = self._persist_mapping(result)
+
+            if onedrive_link and self.render_feishu and self.render_table_id:
+                if progress:
+                    progress(0.95)
+                try:
+                    result.feishu_record_id = self._write_render_record(result, plan)
+                except Exception:
+                    logger.exception("写回飞书成片表失败（成片已生成，可稍后补写）- {}", name)
+
             if progress:
                 progress(1.0)
             logger.info("成片完成 - {} ({}s, {} 段)", name, result.duration_sec, len(clips_meta))
             return result
         finally:
             shutil.rmtree(work, ignore_errors=True)
+
+    def _write_render_record(self, result: RenderResult, plan: RenderPlan) -> str:
+        """把成片写入飞书成片表；缺列自动创建（方便扩展到其他国家表）。"""
+        f = self.render_feishu
+        tid = self.render_table_id
+        materials = ", ".join(f"{c.material_id}({c.role_used.value})" for c in plan.clips)
+        values = {
+            "render_id": result.name,
+            "product_model": plan.product_model,
+            "onedrive_link": result.onedrive_link,
+            "duration": result.duration_sec,
+            "status": "rendered",
+            "materials": materials,
+        }
+        fields: dict = {}
+        for key, val in values.items():
+            name = f.ensure_field(tid, RENDER_FIELDS[key], RENDER_FIELD_TYPES[key])
+            fields[name] = f.format_value(tid, name, val)
+        record = f.create_record(tid, fields)
+        record_id = record.get("record_id", "")
+        logger.info("成片写回飞书 - {} -> record_id={}", result.name, record_id)
+        return record_id
 
     def _persist_mapping(self, result: RenderResult) -> str:
         path = self.mappings_dir / f"{result.name}.json"
@@ -127,9 +165,14 @@ class EditService:
 @lru_cache
 def get_edit_service() -> EditService:
     s = get_settings()
+    render_feishu = None
+    if s.feishu_vn_render_app_token and s.feishu_vn_render_table_id:
+        render_feishu = make_feishu_client(s.feishu_vn_render_app_token)
     return EditService(
         onedrive=get_onedrive_client(),
         workspace_dir=s.workspace_dir,
         data_dir=s.data_dir,
         render_folder=s.onedrive_render_folder,
+        render_feishu=render_feishu,
+        render_table_id=s.feishu_vn_render_table_id,
     )

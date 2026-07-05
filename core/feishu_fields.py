@@ -24,15 +24,30 @@ MATERIAL_FIELDS = {
     "date": ["日期", "Date"],
 }
 
-# 成片表
+# 成片表（AI 生成成片写回；各国家一张表，列名通用。value_type 用于“缺列自动建列”）
 RENDER_FIELDS = {
-    "product_model": ["产品型号", "Product Model"],
-    "status": ["成片状态", "Status", "状态"],
+    "render_id": ["成片ID", "Render ID"],
+    "product_model": ["产品型号", "Product Model", "产品型号(AI)"],
     "onedrive_link": ["成片链接", "ONEDRIVE LINK", "OneDrive Link"],
+    "duration": ["时长（秒）", "时长", "Duration"],
+    "status": ["成片状态", "Status", "状态"],
+    "materials": ["使用素材", "Materials", "素材ID列表"],
     "title": ["标题", "Title"],
     "caption": ["文案", "Caption"],
     "tags": ["标签", "Tags"],
-    "duration": ["时长", "Duration"],
+}
+
+# 成片表各列的 ui_type（新建列时用）
+RENDER_FIELD_TYPES = {
+    "render_id": "text",
+    "product_model": "text",
+    "onedrive_link": "url",
+    "duration": "number",
+    "status": "text",
+    "materials": "text",
+    "title": "text",
+    "caption": "text",
+    "tags": "text",
 }
 
 # 发布表
