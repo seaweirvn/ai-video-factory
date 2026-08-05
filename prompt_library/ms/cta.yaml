@@ -1,0 +1,17 @@
+stage: cta
+language: ms
+language_name: Malay
+goal: "Dorong pembelian secara natural, beri sebab beli sekarang."
+tone: "Bersemangat, sedikit mendesak, gaya menutup jualan yang mudah."
+rules:
+  - "Jangan tulis 'Beli sekarang' kosong sahaja."
+  - "Beri sebab beli (harga baik, takut kehabisan, sesuai keperluan)."
+  - "Kaitkan dengan main_selling_point bila sesuai."
+  - "Ayat pendek dan mengena."
+good_examples:
+  - "Nak putaran licin? Pilih yang ni"
+  - "Harga ni jarang, jangan lepas peluang"
+bad_examples:
+  - "Beli sekarang"     # kosong, tiada sebab
+  - "Hubungi kedai"     # tak mendorong
+output_format: 'Balas JSON sahaja: {"caption": "..."} — satu ayat pendek dalam {language_name}.'

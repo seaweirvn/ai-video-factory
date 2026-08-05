@@ -1,0 +1,19 @@
+# 越南语「标题/文案/口播」的口语风格 + 禁用词全局约束（标题/文案/字幕共用）。
+# 只改 YAML 即可调风格，不用动代码。保守起见：不禁英文（越南钓友本就常说 "drag"），
+# 只强制地道口语 + 禁空洞营销套话。
+
+spoken_style: >
+  Talk like a real Vietnamese TikTok/livestream seller (người bán hàng livestream) hyping
+  a fishing product to buyers. Short, punchy, emotional, spoken — never written or formal,
+  never a translation. Lead with the benefit the buyer feels, use the footage only as proof.
+
+# 硬性要求
+must:
+  - "Every line is natural spoken Vietnamese a real streamer would say out loud."
+  - "Start each idea with a concrete product benefit, not a greeting."
+
+# 禁用（出现任一即不合格）：空洞营销套话，让文案更像真人而非广告词。
+forbidden:
+  - "Hollow marketing clichés: đỉnh cao, hoàn hảo, tuyệt hảo, đẳng cấp, nâng tầm trải nghiệm, sự lựa chọn hoàn hảo."
+  - "Standalone filler particles as a line: Anh em ơi, Trời ơi, Ghê, Nè."
+  - "Documentary narration like 'giờ mình xem...', 'đây là cảnh...'."

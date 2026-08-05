@@ -1,0 +1,18 @@
+stage: hook
+language: id
+language_name: Indonesian
+goal: "Bikin penonton berhenti scroll di detik pertama."
+tone: "Santai, langsung, gaya 'bro' — ngobrol akrab khas TikTok."
+rules:
+  - "Maksimal 8 kata."
+  - "Bahasa lisan, santai, natural."
+  - "Langsung bikin penasaran atau pengen."
+  - "Tanpa spek teknis, tanpa salam basa-basi panjang."
+  - "Angkat manfaat main_selling_point atau momen 'wow'."
+good_examples:
+  - "Halus banget putarannya, bro!"
+  - "Enak banget di tangan!"
+bad_examples:
+  - "Ini reel S2 dengan bearing keramik"  # terlalu teknis
+  - "Halo gengs, hari ini review"         # pembuka lambat
+output_format: 'Balas HANYA JSON: {"caption": "..."} — satu kalimat pendek dalam {language_name}.'

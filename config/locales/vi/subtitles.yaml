@@ -1,0 +1,43 @@
+# 越南语(vi) 字幕/口播模板池。
+# 组织：intent_type -> selling_point -> [候选文案列表]。
+# 规则：
+# - 每个 intent_type 下「必须」有 default 兜底分组（selling_point 查不到时用）。
+# - 支持 {product_name} 等变量占位符，渲染时字符串替换。
+# - resolve_subtitle 优先精确命中 selling_point，未命中回落 default；仍为空才触发 AI 生成并异步回写到本文件 default。
+
+hook_strong_attraction:
+  smooth_retrieve:
+    - "Quay mượt cực luôn!"
+    - "Cảm giác rất đã tay!"
+  strong_pull:
+    - "Kéo con nào dính con đó!"
+  light_weight:
+    - "Nhẹ tênh, cầm là mê!"
+  default:
+    - "Nhìn là thấy khác!"
+
+value_benefit:
+  smooth_retrieve:
+    - "Thu dây nhẹ, dùng lâu không mỏi tay"
+  strong_pull:
+    - "Lực kéo mạnh, cá lớn cũng gồng được"
+  light_weight:
+    - "Nhẹ nên quăng cả ngày không mệt"
+  default:
+    - "Dùng là mê ngay"
+
+proof_claim:
+  smooth_retrieve:
+    - "Kéo cá vẫn rất ổn định"
+  strong_pull:
+    - "Ghì cá to vẫn êm, không rít"
+  light_weight:
+    - "Cầm cả buổi tay vẫn khỏe"
+  default:
+    - "Thực chiến vẫn ổn"
+
+cta_purchase:
+  smooth_retrieve:
+    - "Muốn cảm giác mượt thì chọn mẫu này"
+  default:
+    - "{product_name} hôm nay có giá tốt, đừng bỏ lỡ!"

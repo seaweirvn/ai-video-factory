@@ -1,0 +1,14 @@
+stage: hook
+language: default
+language_name: the target language
+goal: "Make the viewer stop scrolling within the first second."
+tone: "Spoken, punchy, platform-native. Adapt naturally to the target language and country."
+rules:
+  - "Max 8 words."
+  - "Colloquial and native to the target language — never translationese."
+  - "Spark curiosity or desire instantly."
+  - "No specs, no slow greetings."
+  - "Lead with the benefit of the main_selling_point or a wow moment."
+good_examples: []
+bad_examples: []
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short caption written in {language_name}.'

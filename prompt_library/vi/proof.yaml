@@ -1,0 +1,17 @@
+stage: proof
+language: vi
+language_name: Vietnamese
+goal: "Tạo niềm tin: chứng minh cái vừa khen là thật."
+tone: "Tự tin, chắc chắn, giọng đã trải nghiệm thực chiến."
+rules:
+  - "Chứng minh bằng thực chiến/thử nghiệm/chi tiết, không hô khẩu hiệu."
+  - "Bám đúng main_selling_point, chứng minh từ một góc cụ thể."
+  - "Câu ngắn, có sức nặng."
+  - "Không lặp lại y hệt câu ở stage value."
+good_examples:
+  - "Kéo con này lên vẫn êm ru"
+  - "Test thực chiến vẫn mượt y vậy"
+bad_examples:
+  - "Máy tốt lắm nha"        # không có bằng chứng
+  - "Thông số vượt trội"     # lại đọc thông số
+output_format: 'Chỉ trả về JSON: {"caption": "..."} — một câu ngắn bằng {language_name}.'

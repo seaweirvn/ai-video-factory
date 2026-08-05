@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -22,7 +23,7 @@ from loguru import logger
 
 from adapters.feishu import FeishuBitableClient, make_feishu_client
 from adapters.ffmpeg import probe_metadata
-from adapters.onedrive import OneDriveClient, get_onedrive_client
+from adapters.storage import StorageClient, get_storage_client
 from app.config import get_settings
 from core.feishu_fields import MATERIAL_FIELDS
 from core.models import VideoMetadata
@@ -33,7 +34,7 @@ class IngestService:
     def __init__(
         self,
         feishu: FeishuBitableClient,
-        onedrive: OneDriveClient,
+        onedrive: StorageClient,
         table_id: str,
         workspace_dir: Path,
     ) -> None:
@@ -68,6 +69,78 @@ class IngestService:
         logger.info("素材摄取完成 - {}", summary)
         return summary
 
+    def assign_missing_material_ids(self) -> dict[str, int]:
+        """为素材 ID 为空的行按「商品名+递增数字」生成唯一 ID。"""
+        if not self.table_id:
+            raise RuntimeError("未配置素材表 ID（FEISHU_VN_MATERIAL_TABLE_ID）")
+        id_field = self._field("material_id")
+        product_field = self._field("product_model")
+        rows = self.feishu.list_records(
+            self.table_id, page_size=200, text_field_as_array=True
+        )
+
+        used_ids: set[str] = set()
+        max_suffix: dict[str, int] = {}
+        pending: list[tuple[str, str]] = []
+        for record in rows:
+            fields = record.get("fields", {})
+            material_id = self.feishu.cell_text(fields.get(id_field)).strip()
+            product = self.feishu.cell_text(fields.get(product_field)).strip()
+            product_prefix = re.sub(r"\s+", "", product)
+            if material_id:
+                used_ids.add(material_id.casefold())
+                if product_prefix:
+                    match = re.fullmatch(
+                        rf"{re.escape(product_prefix)}(\d+)",
+                        material_id,
+                        flags=re.IGNORECASE,
+                    )
+                    if match:
+                        key = product_prefix.casefold()
+                        max_suffix[key] = max(
+                            max_suffix.get(key, 0), int(match.group(1))
+                        )
+                continue
+            if product_prefix:
+                pending.append((str(record.get("record_id") or ""), product_prefix))
+
+        updated = failed = 0
+        for record_id, product_prefix in pending:
+            key = product_prefix.casefold()
+            suffix = max_suffix.get(key, 0) + 1
+            candidate = f"{product_prefix}{suffix}"
+            while candidate.casefold() in used_ids:
+                suffix += 1
+                candidate = f"{product_prefix}{suffix}"
+            try:
+                self.feishu.update_record(
+                    self.table_id,
+                    record_id,
+                    {
+                        id_field: self.feishu.format_value(
+                            self.table_id, id_field, candidate
+                        )
+                    },
+                )
+                used_ids.add(candidate.casefold())
+                max_suffix[key] = suffix
+                updated += 1
+            except Exception:  # noqa: BLE001 - 单条失败不阻塞其它素材
+                failed += 1
+                logger.exception(
+                    "自动补素材ID失败 - record_id={} candidate={}",
+                    record_id,
+                    candidate,
+                )
+
+        summary = {
+            "missing": len(pending),
+            "updated": updated,
+            "failed": failed,
+        }
+        logger.info("自动补素材ID完成 - {}", summary)
+        return summary
+
     def process_link(self, record_id: str, onedrive_link: str) -> dict[str, Any]:
         """单条：给定 record_id + 链接，下载并回写时长。"""
         return self._process(record_id, onedrive_link, "").model_dump()
@@ -81,7 +154,8 @@ class IngestService:
         pending: list[dict[str, Any]] = []
         for record in self.feishu.list_records(self.table_id, text_field_as_array=True):
             fields = record.get("fields", {})
-            link = self.feishu.cell_link(fields.get(link_field))
+            link_cell = fields.get(link_field)
+            link = self.feishu.cell_link(link_cell) or self.feishu.cell_text(link_cell)
             if not link:
                 continue
             # 已勾选“读取时长”视为已处理，跳过。
@@ -99,22 +173,39 @@ class IngestService:
     def _process(self, record_id: str, link: str, material_id: str) -> VideoMetadata:
         if not link:
             raise ValueError("素材缺少 OneDrive 链接")
-        meta = self._probe(record_id or material_id or "tmp", link)
-        self._write_metadata(record_id, meta)
-        logger.info("素材完成 - id={} record_id={} 时长={}s", material_id, record_id, round(meta.duration_sec, 2))
-        return meta
-
-    def _probe(self, tag: str, link: str) -> VideoMetadata:
-        """优先用 OneDrive 元数据读时长（不下载）；facet 缺失时回退到下载 + ffprobe。"""
+        # 先取一次 driveItem 元数据（含文件名），用于「文件名提取素材ID」+「免下载读时长」。
+        item: dict = {}
         try:
             item = self.onedrive.get_share_item_metadata(link)
+        except Exception:  # noqa: BLE001 - 失败则回退下载探测；素材ID留空
+            logger.exception("读取 OneDrive 元数据失败，回退下载+ffprobe")
+        # 仅当该行素材ID为空时，从文件名（.mp4 前的英文和数字）提取并回写
+        new_id = "" if material_id else self._material_id_from_name(str(item.get("name") or ""))
+        meta = self._probe_meta(item, record_id or material_id or new_id or "tmp", link)
+        self._write_metadata(record_id, meta, new_id)
+        logger.info("素材完成 - id={} record_id={} 时长={}s",
+                    material_id or new_id, record_id, round(meta.duration_sec, 2))
+        return meta
+
+    @staticmethod
+    def _material_id_from_name(name: str) -> str:
+        """从文件名提取素材ID：取扩展名(.mp4等)前的部分，只保留英文和数字。
+
+        例："Z1185.mp4" -> "Z1185"；"S2 130.MP4" -> "S2130"。取不到则返回空串。
+        """
+        if not name:
+            return ""
+        stem = re.sub(r"\.[^.]+$", "", name).strip()  # 去掉最后一个扩展名
+        return re.sub(r"[^A-Za-z0-9]", "", stem)       # 只留英文和数字
+
+    def _probe_meta(self, item: dict, tag: str, link: str) -> VideoMetadata:
+        """优先用已取到的 OneDrive 元数据读时长（不下载）；缺时长时回退下载 + ffprobe。"""
+        if item:
             meta = self._metadata_from_item(item)
             if meta.duration_sec > 0:
                 logger.info("元数据(免下载) - {}", meta.model_dump())
                 return meta
             logger.warning("OneDrive 未返回时长，回退下载+ffprobe - {}", item.get("name"))
-        except Exception:
-            logger.exception("读取 OneDrive 元数据失败，回退下载+ffprobe")
         return self._download_and_probe(tag, link)
 
     @staticmethod
@@ -142,13 +233,16 @@ class IngestService:
         finally:
             dest.unlink(missing_ok=True)
 
-    def _write_metadata(self, record_id: str, meta: VideoMetadata) -> None:
+    def _write_metadata(self, record_id: str, meta: VideoMetadata, material_id: str = "") -> None:
         fields: dict[str, Any] = {}
         # 按业务约定：时长列填“秒”（尽管列名写毫秒）。
         self._put(fields, "duration", round(meta.duration_sec, 2))
         read_field = self.feishu.resolve_field(self.table_id, MATERIAL_FIELDS["duration_read"])
         if read_field:
             fields[read_field] = True
+        # 从文件名提取到的素材ID（仅在该行原本为空时回写）
+        if material_id:
+            self._put(fields, "material_id", material_id)
         if not fields:
             logger.warning("素材表无可写字段，跳过回写 - record_id={}", record_id)
             return
@@ -172,7 +266,7 @@ def get_ingest_service() -> IngestService:
     app_token = s.feishu_vn_material_app_token or s.feishu_vn_bitable_app_token
     return IngestService(
         feishu=make_feishu_client(app_token),
-        onedrive=get_onedrive_client(),
+        onedrive=get_storage_client(),
         table_id=s.feishu_vn_material_table_id,
         workspace_dir=s.workspace_dir,
     )

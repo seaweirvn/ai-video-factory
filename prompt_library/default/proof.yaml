@@ -1,0 +1,13 @@
+stage: proof
+language: default
+language_name: the target language
+goal: "Build trust: prove the claim you just made is real."
+tone: "Confident, grounded, field-tested. Adapt to the target language and country."
+rules:
+  - "Prove with real use / tests / details, not slogans."
+  - "Stay on the same main_selling_point, prove it from one concrete angle."
+  - "Short and weighty."
+  - "Do not repeat the value line verbatim."
+good_examples: []
+bad_examples: []
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short caption written in {language_name}.'

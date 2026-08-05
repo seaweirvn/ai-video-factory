@@ -1,0 +1,13 @@
+stage: cta
+language: default
+language_name: the target language
+goal: "Naturally drive the purchase with a reason to buy now."
+tone: "Upbeat, lightly urgent, closing style. Adapt to the target language and country."
+rules:
+  - "Never just write a bare 'Buy now'."
+  - "Give a reason to buy (good price, scarcity, fits their need)."
+  - "Tie back to the main_selling_point when it fits."
+  - "Short and compelling."
+good_examples: []
+bad_examples: []
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short caption written in {language_name}.'

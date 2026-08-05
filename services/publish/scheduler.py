@@ -26,6 +26,7 @@ class PublishItem:
     post_id: str = ""
     post_url: str = ""
     error: str = ""
+    publish_record_id: str = ""   # 飞书发布表记录 id（排期时创建，run 后回写状态）
 
     def to_dict(self) -> dict:
         return dict(self.__dict__)

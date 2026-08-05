@@ -1,0 +1,93 @@
+# 飞书镜头标签(主标签/辅助标签，中文) -> 英文卖点枚举(selling_points.yaml 的 key)。
+#
+# 说明：
+# - 本表 key 依据飞书素材实际取值补全（698 条素材统计出的全部主标签/辅助标签）。
+# - 匹配为「大小写不敏感 + 去首尾空白」的精确匹配；命中不了再尝试「子串包含」，都不中走 default。
+# - 「产品 / 实战 / 场景 / 氛围 / 岸边环境」属于镜头内容类别而非卖点，故意不映射：
+#   这样当它们作为主标签时会自动落到已映射的辅助标签上取卖点，取不到再走 default。
+# - 越南语别名保留少量，方便未来飞书切越南语命名时兼容。
+default: smooth_retrieve
+
+mapping:
+  # —— smooth_retrieve 收线顺滑丝滑 ——
+  "顺滑": smooth_retrieve
+  "丝滑": smooth_retrieve
+  "顺滑展示": smooth_retrieve
+  "高级摇感": smooth_retrieve
+  "低启动阻力": smooth_retrieve
+  "高转动惯性": smooth_retrieve
+  "节奏感": smooth_retrieve
+  "quay mượt": smooth_retrieve
+  "mượt": smooth_retrieve
+
+  # —— light_weight 轻量 ——
+  "轻量": light_weight
+  "轻量化转子": light_weight
+  "减重": light_weight
+  "nhẹ": light_weight
+
+  # —— strong_pull 泄力/大力/控大鱼 ——
+  "泄力": strong_pull
+  "大鱼": strong_pull
+  "控鱼": strong_pull
+  "kéo khỏe": strong_pull
+
+  # —— long_cast 抛投远 ——
+  "远投": long_cast
+
+  # —— stable 稳定 ——
+  "稳定": stable
+
+  # —— premium_look 高级感/升级感/做工外观 ——
+  "升级感": premium_look
+  "高级感": premium_look
+  "高端感": premium_look
+  "专业感": premium_look
+  "机械美感": premium_look
+  "机械感": premium_look
+  "金属质感": premium_look
+  "外观": premium_look
+  "升级配置": premium_look
+  "高配": premium_look
+  "配置": premium_look
+
+  # —— beginner_friendly 新手友好/易上手 ——
+  "入门": beginner_friendly
+  "新手": beginner_friendly
+  "新手友好": beginner_friendly
+  "操作轻松": beginner_friendly
+  "轻松": beginner_friendly
+  "泛用": beginner_friendly
+  "日常": beginner_friendly
+  "全天作钓": beginner_friendly
+
+  # —— semi_ceramic_bearing 半陶瓷轴承 ——
+  "半陶瓷轴承": semi_ceramic_bearing
+  "半陶瓷": semi_ceramic_bearing
+
+  # —— precise_line_lay 精密排线 ——
+  "精密排线": precise_line_lay
+  "排线整齐": precise_line_lay
+
+  # —— metal_spool 金属线杯 ——
+  "金属线杯": metal_spool
+
+  # —— durable 耐用做工 ——
+  "耐用": durable
+  "做工": durable
+  "不变形": durable
+  "材质": durable
+  "精密制造": durable
+
+  # —— catch_result 鱼获战绩 ——
+  "鱼获": catch_result
+  "爆口": catch_result
+  "战绩": catch_result
+  "成果": catch_result
+  "成就感": catch_result
+
+  # —— drag_sound 泄力声/清脆声 ——
+  "泄力声": drag_sound
+  "声音报警": drag_sound
+  "清脆声音": drag_sound
+  "声音": drag_sound

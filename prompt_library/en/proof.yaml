@@ -1,0 +1,17 @@
+stage: proof
+language: en
+language_name: English
+goal: "Build trust: prove the claim you just made is real."
+tone: "Confident, grounded, like someone who field-tested it. No Chinglish."
+rules:
+  - "Prove with real use / tests / details, not slogans."
+  - "Stay on the same main_selling_point, prove it from one concrete angle."
+  - "Short and weighty."
+  - "Do not repeat the value line verbatim."
+good_examples:
+  - "Still smooth even hauling this one in"
+  - "Tested it live — smooth all the way"
+bad_examples:
+  - "It's really good"          # no proof
+  - "Superior specifications"   # specs again
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short caption in {language_name}.'

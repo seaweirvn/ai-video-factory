@@ -1,0 +1,20 @@
+stage: cta
+language: zh
+language_name: Chinese
+goal: "自然促单，给一个'现在就下手'的理由。"
+tone: "亢奋、略带紧迫、收尾感，像直播间最后逼单那句。"
+rules:
+  - "别只写'立即购买'这种硬邦邦的话。"
+  - "给个理由：价格香/限量/正好合适。"
+  - "合适时扣回 main_selling_point。"
+  - "短、有冲击、口语。"
+  - "品牌型号(SEAWEIR、S2)保持英文原样。"
+good_examples:
+  - "这价格闭眼入，手慢就没！"
+  - "库存不多，钓友抓紧冲！"
+  - "点下方链接，直接拿下 S2！"
+bad_examples:
+  - "立即购买"       # 太生硬
+  - "欢迎选购本产品" # 无力、书面
+  - "赶快行动起来吧" # 翻译腔
+output_format: '只返回 JSON：{"caption": "..."} —— 一句简短的{language_name}口语。'

@@ -12,6 +12,7 @@ from pathlib import Path
 
 from loguru import logger
 
+from app.config import get_settings
 from core.models import VideoMetadata
 
 
@@ -19,9 +20,16 @@ def probe_metadata(path: Path) -> VideoMetadata:
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"视频不存在: {path}")
-    ffprobe = shutil.which("ffprobe")
+    configured = get_settings().ffprobe_path
+    ffprobe = (
+        str(configured)
+        if configured and Path(configured).is_file()
+        else shutil.which("ffprobe")
+    )
     if not ffprobe:
-        raise RuntimeError("未找到 ffprobe，请安装 FFmpeg 并加入 PATH")
+        raise RuntimeError(
+            "未找到 ffprobe，请配置 FFPROBE_PATH 或将 FFmpeg 加入 PATH"
+        )
 
     cmd = [
         ffprobe,

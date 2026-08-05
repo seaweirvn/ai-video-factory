@@ -13,11 +13,24 @@ data/onedrive/auth_record.json
 workspace/
 logs/
 data/*.json
+data/**/*.json
+data/**/*.jsonl
+data/**/*.log
+data/kol/videos/
 !data/.gitkeep
+
+# BGM 音频文件与在线选曲缓存（不入库；保留 README/占位与配置）
+assets/bgm/cache/
+!assets/bgm/cache/.gitkeep
+assets/bgm/**/*.mp3
+assets/bgm/**/*.m4a
+assets/bgm/**/*.wav
 
 # Inspection / temp tool output
 tmp-*.txt
 tmp_*.txt
+tmp-*
+tmp_*
 
 # OS / IDE
 .DS_Store

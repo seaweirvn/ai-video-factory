@@ -1,0 +1,14 @@
+stage: question
+language: default
+language_name: the target language
+goal: "Open with a question that hits the viewer's desire or doubt, making them want the answer."
+tone: "Curious, conversational, native. Adapt naturally to the target language and country."
+rules:
+  - "Phrase it as a real question the target buyer would ask themselves."
+  - "Max 10 words."
+  - "Tie the question to the main_selling_point or the on-screen shot."
+  - "Colloquial and native — never translationese."
+  - "No specs, no greetings; create an open loop the video will answer."
+good_examples: []
+bad_examples: []
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short question written in {language_name}.'

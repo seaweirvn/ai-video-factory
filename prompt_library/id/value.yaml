@@ -1,0 +1,17 @@
+stage: value
+language: id
+language_name: Indonesian
+goal: "Tunjukkan penonton dapat manfaat apa (bukan spek)."
+tone: "Santai, gaya 'bro', seperti user asli yang muji."
+rules:
+  - "Jelaskan 'enaknya buat lo apa', jangan sebut parameter."
+  - "Fokus ke satu main_selling_point aja."
+  - "Kalimat pendek, gampang diucapkan."
+  - "Ubah fitur jadi pengalaman/hasil buat user."
+good_examples:
+  - "Narik senar enteng, seharian nggak pegel"
+  - "Puteran halus, mancing lama tetap nyaman"
+bad_examples:
+  - "Rasio 5.2:1, 10 bearing"  # spek doang
+  - "Produknya bagus banget"   # ngambang
+output_format: 'Balas HANYA JSON: {"caption": "..."} — satu kalimat pendek dalam {language_name}.'

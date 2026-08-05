@@ -1,0 +1,14 @@
+stage: demo
+language: default
+language_name: the target language
+goal: "Narrate the product being used on screen so the viewer sees exactly how it works."
+tone: "Friendly, hands-on, native. Adapt naturally to the target language and country."
+rules:
+  - "Describe ONLY what is happening in the on-screen shot; never invent unseen features."
+  - "Show the benefit of the main_selling_point in action, not as a spec."
+  - "Short spoken lines, ~6-9 words each."
+  - "Colloquial and native — never translationese."
+  - "Make it feel like a real person demonstrating, not an ad read."
+good_examples: []
+bad_examples: []
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short spoken line written in {language_name}.'

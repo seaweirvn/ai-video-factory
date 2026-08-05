@@ -64,11 +64,33 @@ docker compose up -d
 - 配音驱动剪辑（可选，`voiceover.enabled`；需 `OPENAI_API_KEY`）：
   - 生成口播脚本 -> OpenAI TTS 逐句合成配音 + 句级字幕(SRT) -> 用配音时长驱动选材 -> 音轨按素材「保留原声」逐段决定（勾选=配音+原声混音，未勾=只配音）-> 烧录字幕 -> 裁到配音时长。
   - 默认关闭，不影响原声拼接流程。`POST /edit/render` 传 `voiceover.enabled=true` 启用。
-- 阶段 4（进行中）：排期 + 发布。
+- 阶段 4（进行中）：排期 + 发布 + n8n 全链路编排。
   - 排期引擎：成片按账号分配，每账号每天 3~5 条，白天(默认 9-21)错峰随机时间。
   - `POST /publish/schedule` 生成发布计划(落 `data/publish/<date>.json`)，`POST /publish/run` 到点执行，`GET /publish/items` 看状态。
   - 发布器可切换：配置第三方聚合工具(`PUBLISH_BASE_URL/API_KEY`)后走真实发布，未配置用 stub 只记录。
-  - 待办：接第三方工具真实发布 + 发布表/账号表(待用户提供 ID)。
+  - **编排端点**（让 n8n 只做定时+单次 HTTP）：
+    - `POST /produce`：一次把 选材→(可选)配音→剪辑→上传→文案回写 打包成异步 job。传 `product_model` 产单品，传 `products` 或都留空则批量（自动发现所有可组片产品）。
+    - `GET /produce/products`：列出可组片（有 HOOK 且有 CTA）的产品型号，供 n8n 数据驱动循环。
+    - `POST /publish/schedule/auto`：读成片表里 `成片状态=rendered` 的成片，按 `PUBLISH_ACCOUNTS` 排期并置为 `scheduled`，n8n 无需传成片列表。
+  - 待办：接第三方工具真实发布 + 发布表/账号表(待用户提供 ID)、把发布结果回写飞书。
+
+### n8n 定时工作流（`n8n/workflows/`）
+
+四条链路解耦、可单独重跑，全部通过 HTTP 调 Python API：
+
+| 文件 | 触发 | 动作 |
+| --- | --- | --- |
+| `01-ingest.json` | 每 6 小时 | `POST /materials/ingest` → 轮询 `/jobs/{id}` 直到完成 |
+| `02-produce.json` | 每天 02:00 | `POST /produce`（批量、自动发现产品、每产品 3 条）→ 轮询 job |
+| `03-schedule.json` | 每天 06:00 | `POST /publish/schedule/auto`（读成片表 + 配置账号排期）|
+| `04-run.json` | 每 15 分钟 | `POST /publish/run`（执行到点发布）|
+
+导入方式：n8n → Import from File，逐个导入上面 JSON。需在 n8n 里设置两个环境变量：
+
+- `AIVF_BASE_URL`：API 地址，如 `http://api:8000`（Docker 内）或 `http://localhost:8000`。
+- `AIVF_API_KEY`：与 `.env` 的 `API_KEY` 一致（每次请求带 `X-API-Key` 头）。
+
+发布账号在 `.env` 的 `PUBLISH_ACCOUNTS` 里配（逗号分隔），账号表就绪后改为从飞书读。生产的条数在 `02-produce.json` 的「启动生产」节点 body 里调（`count`）。
 - 阶段 5：数据回收。
 - 阶段 6：归因 + 评分闭环。
 - 阶段 7：自愈/规模化 + 多平台/AI 扩展。

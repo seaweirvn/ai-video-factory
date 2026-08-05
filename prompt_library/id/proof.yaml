@@ -1,0 +1,17 @@
+stage: proof
+language: id
+language_name: Indonesian
+goal: "Bangun kepercayaan: buktikan klaim tadi beneran."
+tone: "Pede, membumi, gaya 'bro' yang udah nyoba langsung."
+rules:
+  - "Buktikan pakai pemakaian nyata/tes/detail, bukan slogan."
+  - "Tetap di main_selling_point yang sama, dari satu sudut konkret."
+  - "Kalimat pendek dan berbobot."
+  - "Jangan ulang persis kalimat value."
+good_examples:
+  - "Tarik ikan segini tetap halus"
+  - "Udah dites, mulusnya nyata"
+bad_examples:
+  - "Pokoknya bagus"        # tanpa bukti
+  - "Speknya unggul"        # spek lagi
+output_format: 'Balas HANYA JSON: {"caption": "..."} — satu kalimat pendek dalam {language_name}.'

@@ -1,0 +1,18 @@
+stage: hook
+language: en
+language_name: English
+goal: "Make the viewer stop scrolling within the first second."
+tone: "Clear, punchy, TikTok-native. No Chinglish, no stiff phrasing."
+rules:
+  - "Max 8 words."
+  - "Spoken and colloquial, native English."
+  - "Spark curiosity or desire instantly."
+  - "No specs, no slow greetings."
+  - "Lead with the benefit of the main_selling_point or a wow moment."
+good_examples:
+  - "So buttery smooth!"
+  - "Feels amazing in hand!"
+bad_examples:
+  - "This is the S2 reel with ceramic bearings"  # too technical
+  - "Hey guys, today I'm reviewing"              # slow intro
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short caption in {language_name}.'

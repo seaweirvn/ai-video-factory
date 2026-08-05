@@ -1,0 +1,17 @@
+stage: cta
+language: en
+language_name: English
+goal: "Naturally drive the purchase with a reason to buy now."
+tone: "Upbeat, lightly urgent, closing style. No Chinglish."
+rules:
+  - "Never just write a bare 'Buy now'."
+  - "Give a reason to buy (good price, scarcity, fits their need)."
+  - "Tie back to the main_selling_point when it fits."
+  - "Short and compelling."
+good_examples:
+  - "Want that smooth feel? Grab this one"
+  - "This price won't last — don't miss it"
+bad_examples:
+  - "Buy now"          # bare, no reason
+  - "Contact the shop" # no push
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short caption in {language_name}.'

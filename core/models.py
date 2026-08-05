@@ -23,8 +23,12 @@ class Material(BaseModel):
     record_id: str
     material_id: str = ""
     product_model: str = ""
+    material_type: str = ""       # 素材类型（手持展示 / 空摇 / 泄力……）
+    shooting_content: str = ""    # 拍摄内容（当前画面内容，文案接地的最高优先级）
     roles: list[MaterialRole] = Field(default_factory=list)
-    tags: list[str] = Field(default_factory=list)
+    main_tag: str = ""            # 主标签（一级卖点）
+    aux_tags: list[str] = Field(default_factory=list)  # 辅助标签（二级卖点）
+    tags: list[str] = Field(default_factory=list)      # 主+辅合并（选材/关键词兼容用）
     onedrive_link: str = ""
     duration_sec: float = 0.0
     keep_original_audio: bool = False
@@ -33,6 +37,16 @@ class Material(BaseModel):
 
     def has_role(self, role: MaterialRole) -> bool:
         return role in self.roles
+
+
+class ProductProfile(BaseModel):
+    """产品中心里的一条产品背景信息（定位/人群/禁用词），供文案接地。"""
+
+    product_model: str
+    positioning: str = ""
+    target_audience: str = ""
+    forbidden_words: list[str] = Field(default_factory=list)
+    selling_points: list[str] = Field(default_factory=list)
 
 
 class RenderClip(BaseModel):
@@ -44,6 +58,7 @@ class RenderClip(BaseModel):
     onedrive_link: str = ""
     duration_sec: float = 0.0
     keep_original: bool = False
+    beat: str = ""  # Director 路径：该片段归属的 beat 名（hook/demo/proof...）；旧路径为空
 
 
 class RenderPlan(BaseModel):
@@ -52,6 +67,8 @@ class RenderPlan(BaseModel):
     product_model: str = ""
     clips: list[RenderClip] = Field(default_factory=list)
     target_duration_sec: float = 0.0
+    selling_point: str = ""  # 选材决定的核心卖点（Layer 2：证据最硬者），供 director 对齐
+    playbook: str = ""  # Director 路径：本计划采用的结构名（供归因/学习）；旧路径为空
 
     @property
     def total_duration_sec(self) -> float:

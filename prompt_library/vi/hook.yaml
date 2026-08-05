@@ -1,0 +1,18 @@
+stage: hook
+language: vi
+language_name: Vietnamese
+goal: "Khiến người xem dừng lướt ngay trong 1 giây đầu tiên."
+tone: "Nói như streamer bán hàng Việt: khẩu ngữ, hào hứng, nhanh và cuốn."
+rules:
+  - "Tối đa 8 từ."
+  - "Phải là khẩu ngữ, tự nhiên, hợp TikTok."
+  - "Gây tò mò hoặc khơi thèm muốn ngay lập tức."
+  - "Không nói thông số/kỹ thuật, không chào hỏi dài dòng."
+  - "Bám vào lợi ích của main_selling_point hoặc một khoảnh khắc 'wow'."
+good_examples:
+  - "Quay mượt cực luôn!"
+  - "Cảm giác đã tay thật sự!"
+bad_examples:
+  - "Đây là máy câu S2 ổ bi bán gốm sứ"   # quá kỹ thuật
+  - "Xin chào các bạn hôm nay mình review"  # mở đầu chậm
+output_format: 'Chỉ trả về JSON: {"caption": "..."} — một câu ngắn bằng {language_name}.'

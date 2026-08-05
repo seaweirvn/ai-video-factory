@@ -1,0 +1,14 @@
+stage: problem
+language: default
+language_name: the target language
+goal: "Name the pain or frustration the viewer already feels, so they lean in."
+tone: "Empathetic, relatable, native. Adapt naturally to the target language and country."
+rules:
+  - "State the real problem the target buyer struggles with."
+  - "Max 10 words; make it feel personal ('you')."
+  - "Do not mention the product yet — just the pain."
+  - "Colloquial and native — never translationese."
+  - "Set up the solution that the next lines will deliver."
+good_examples: []
+bad_examples: []
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short line written in {language_name}.'

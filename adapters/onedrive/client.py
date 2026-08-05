@@ -22,6 +22,9 @@ from app.config import get_settings
 
 # 上传分片必须是 320 KiB 的整数倍。
 _UPLOAD_CHUNK_SIZE = 320 * 1024 * 10
+# ≤ 该阈值走 Graph 简单上传（PUT .../content）；msgraph LargeFileUploadTask 处理
+# 小于一个分片的小文件会 400，故小文件绕开分片会话。阈值 > 分片大小，保证走会话的都是多分片。
+_SIMPLE_UPLOAD_MAX = 4 * 1024 * 1024
 _GRAPH_BASE = "https://graph.microsoft.com/v1.0"
 
 
@@ -87,6 +90,9 @@ class OneDriveClient:
             cache_persistence_options=cache_options,
             prompt_callback=prompt_callback,
         )
+        # 全程启用 CAE：msgraph 上传 SDK 默认按 CAE 取 token（读 `<cache>.cae` 分区），
+        # 若登录不开 CAE 只填充非 CAE 分区，会导致上传静默刷新失败、回退设备码。
+        # 这里登录开 CAE 填充 `.cae` 分区，_access_token 也开 CAE，两条路径读同一分区。
         record = credential.authenticate(scopes=self.scopes, enable_cae=True)
         self.auth_record_path.parent.mkdir(parents=True, exist_ok=True)
         self.auth_record_path.write_text(record.serialize(), encoding="utf-8")
@@ -95,7 +101,9 @@ class OneDriveClient:
 
     def _access_token(self) -> str:
         credential = self._get_credential()
-        token = credential.get_token(*self.scopes)
+        # enable_cae 与 authenticate/msgraph 保持一致，统一读 `.cae` 缓存分区，
+        # 避免非 CAE 取 token 读空分区导致回退设备码。
+        token = credential.get_token(*self.scopes, enable_cae=True)
         return token.token
 
     # ---------- 下载（按分享链接） ----------
@@ -137,13 +145,96 @@ class OneDriveClient:
         encoded = base64.urlsafe_b64encode(share_url.encode("utf-8")).decode("utf-8")
         return "u!" + encoded.rstrip("=")
 
+    # ---------- 建目录（幂等） ----------
+    def ensure_folder(self, folder_path: str) -> None:
+        """逐级确保 OneDrive 目录存在（已存在则跳过），供上传前建「按月份/按国家」子目录。
+
+        createUploadSession 按路径上传时不保证自动建深层父目录，缺目录会 400；
+        这里从根逐段 GET，缺则 POST 建，容忍 409（并发已存在）。
+        """
+        from urllib.parse import quote
+
+        segments = [s for s in folder_path.strip("/").split("/") if s]
+        headers = {
+            "Authorization": f"Bearer {self._access_token()}",
+            "Content-Type": "application/json",
+        }
+        parent = ""
+        for seg in segments:
+            child = f"{parent}/{seg}".strip("/")
+            check = requests.get(
+                f"{_GRAPH_BASE}/me/drive/root:/{quote(child)}", headers=headers, timeout=30
+            )
+            if check.status_code == 200:
+                parent = child
+                continue
+            if parent:
+                create_url = f"{_GRAPH_BASE}/me/drive/root:/{quote(parent)}:/children"
+            else:
+                create_url = f"{_GRAPH_BASE}/me/drive/root/children"
+            resp = requests.post(
+                create_url,
+                headers=headers,
+                json={"name": seg, "folder": {}, "@microsoft.graph.conflictBehavior": "fail"},
+                timeout=30,
+            )
+            if resp.status_code not in (200, 201, 409):
+                resp.raise_for_status()
+            logger.info("OneDrive 目录就绪 - /{}", child)
+            parent = child
+
     # ---------- 上传 + 分享 ----------
     def upload_and_share(self, local_path: Path, target_folder: str | None = None) -> str:
         local_path = Path(local_path)
         if not local_path.exists():
             raise FileNotFoundError(f"待上传文件不存在: {local_path}")
         folder = "/" + target_folder.strip("/") if target_folder else self.target_folder
+        # 小文件走简单上传（避开 LargeFileUploadTask 单分片 400）；大文件走分片会话。
+        if local_path.stat().st_size <= _SIMPLE_UPLOAD_MAX:
+            return self._simple_upload_and_share(local_path, folder)
         return asyncio.run(self._upload_and_share_async(local_path, folder))
+
+    def _simple_upload_and_share(self, local_path: Path, target_folder: str) -> str:
+        """<=4MB 小文件：PUT .../content 一次传完，再建分享链接。全程 REST，稳。"""
+        from urllib.parse import quote
+
+        token = self._access_token()
+        item_path = f"{target_folder.strip('/')}/{local_path.name}"
+        url = f"{_GRAPH_BASE}/me/drive/root:/{quote(item_path)}:/content"
+        resp = requests.put(
+            url,
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/octet-stream"},
+            data=local_path.read_bytes(),
+            timeout=300,
+        )
+        resp.raise_for_status()
+        item_id = resp.json().get("id")
+        if not item_id:
+            raise RuntimeError("简单上传完成但未拿到 OneDrive 文件 ID")
+        link = self._create_share_link_rest(item_id)
+        logger.info("上传完成（简单上传），分享链接: {}", link)
+        return link
+
+    def _create_share_link_rest(self, item_id: str) -> str:
+        """REST 版建分享链接：anonymous 失败回退 organization。"""
+        token = self._access_token()
+        scopes_to_try = [self.link_scope]
+        if self.link_scope == "anonymous":
+            scopes_to_try.append("organization")
+        last: requests.Response | None = None
+        for scope in scopes_to_try:
+            resp = requests.post(
+                f"{_GRAPH_BASE}/me/drive/items/{item_id}/createLink",
+                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                json={"type": self.link_type, "scope": scope},
+                timeout=60,
+            )
+            if resp.status_code in (200, 201):
+                return str(resp.json().get("link", {}).get("webUrl", ""))
+            last = resp
+        if last is not None:
+            last.raise_for_status()
+        return ""
 
     async def _upload_and_share_async(self, local_path: Path, target_folder: str) -> str:
         from msgraph import GraphServiceClient

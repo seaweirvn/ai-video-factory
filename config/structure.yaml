@@ -1,0 +1,63 @@
+# 成交视频结构（跨市场通用，不含任何文案）。
+# 固定四段 hook/value/proof/cta；只描述时长/意图/语调，不描述具体镜头选择(见 shot_priority.yaml)。
+#
+# target: 优化目标。本算法核心是「成交率」而非播放量。
+target: conversion
+
+# 选择 variant 的阈值：可用素材总时长 >= min_full_material_sec 用 full(25s)，否则 compact(15s)。
+min_full_material_sec: 18
+
+variants:
+  full:           # 素材充足：25 秒版
+    total: 25
+    stages:
+      hook:
+        time_range: "0-3s"
+        goal: "stop scrolling"
+        intent_type: hook_strong_attraction
+        tone: excited
+      value:
+        time_range: "3-10s"
+        goal: "show user benefit"
+        intent_type: value_benefit
+        tone: friendly
+      proof:
+        time_range: "10-20s"
+        goal: "prove the claim"
+        intent_type: proof_claim
+        tone: confident
+      cta:
+        time_range: "20-25s"
+        goal: "drive purchase"
+        intent_type: cta_purchase
+        tone: urgent
+  compact:        # 素材不足：15 秒压缩版
+    total: 15
+    stages:
+      hook:
+        time_range: "0-2s"
+        goal: "stop scrolling"
+        intent_type: hook_strong_attraction
+        tone: excited
+      value:
+        time_range: "2-6s"
+        goal: "show user benefit"
+        intent_type: value_benefit
+        tone: friendly
+      proof:
+        time_range: "6-12s"
+        goal: "prove the claim"
+        intent_type: proof_claim
+        tone: confident
+      cta:
+        time_range: "12-15s"
+        goal: "drive purchase"
+        intent_type: cta_purchase
+        tone: urgent
+
+# 四个固定 intent_type（与 subtitles.yaml 顶层 key 对齐）。仅作校验用途。
+intent_types:
+  - hook_strong_attraction
+  - value_benefit
+  - proof_claim
+  - cta_purchase

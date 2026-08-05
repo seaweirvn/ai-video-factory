@@ -1,0 +1,50 @@
+# BGM 曲库（P1 热门音频槽）。audio_mood -> 曲目文件列表。
+#
+# 选曲三层兜底：在线 Provider（可选）-> 本地曲库 -> 无 BGM。
+# - base_dir: 本地曲目根目录（相对项目根）。放「可商用曲库」文件到这里。
+# - moods: 每个情绪一组曲目（相对 base_dir 的文件名）。为空则该情绪不选本地曲。
+# - countries: 按国家分组（国家优先），countries.<国家>.<情绪>: [曲目]。
+# - online: 自动在线选曲（默认关）。开启后先按 国家+情绪 检索可商用曲并下载缓存。
+#
+# 默认全部为空 + online.enabled=false => 成片不加 BGM，行为与接入前完全一致（安全增量）。
+# 版权提醒：本槽放可商用曲库；平台「热门原声」需在 TikTok 端挂载，不由本槽替代。
+
+base_dir: assets/bgm
+
+# 全局兜底（不区分国家）：当国家/情绪都没命中本地曲时用
+moods:
+  energetic: [common/test_bgm.mp3]
+  upbeat: [common/test_bgm.mp3]
+  chill: [common/test_bgm.mp3]
+  suspense: [common/test_bgm.mp3]
+
+# 国家优先曲库：countries.<国家>.<情绪>: [相对 base_dir 的文件名]
+countries: {}
+  # 示例：
+  # VN:
+  #   upbeat:    [vn/upbeat_01.mp3]
+  #   energetic: [vn/energetic_01.mp3]
+
+# ===== 自动在线选曲 + 本地音乐库（默认关闭，接好 key 验证通过后再开）=====
+# 开启后：ε 概率在线拉「新曲」下载入库；其余按 GMV 分复用库内高分曲（经常复用）。
+online:
+  enabled: false
+  provider: jamendo          # jamendo（默认，免费）| magnific（付费订阅，备用）
+  timeout_sec: 15            # 检索+下载总超时；超时静默回落本地/无 BGM，绝不打断成片
+  cache_dir: assets/bgm/cache
+  recent_avoid: 8            # 每国最近用过的 N 首内避免重复
+  # 国家 -> 检索参数（近似「本地流行风格」；用风格 genre + 流行度近似，非地区榜）
+  # 用通用小写词：jamendo 直接作 fuzzytags；magnific 会自动 Title-Case 匹配其 genre 枚举。
+  country_query:
+    VN:
+      genre: [pop, acoustic]
+  # audio_mood -> API mood（叠加到 country_query 一起检索）
+  mood_tags:
+    upbeat:    [happy, upbeat]
+    energetic: [energetic, exciting]
+    chill:     [relaxing, peaceful]
+    suspense:  [dramatic, tension]
+
+  # 仅 jamendo 用：只取可商用授权（cc_by 需署名，署名自动带出）。
+  license: cc_by
+  audioformat: mp32

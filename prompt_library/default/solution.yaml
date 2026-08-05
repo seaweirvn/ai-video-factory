@@ -1,0 +1,14 @@
+stage: solution
+language: default
+language_name: the target language
+goal: "Present the product as the fix to the problem, centered on the main_selling_point."
+tone: "Confident, reassuring, native. Adapt naturally to the target language and country."
+rules:
+  - "Directly connect the product's main_selling_point to solving the stated problem."
+  - "Ground the claim in what the on-screen shot shows."
+  - "Short spoken lines, ~6-9 words each."
+  - "Colloquial and native — never translationese; confident, not hype."
+  - "No raw specs; lead with the felt benefit."
+good_examples: []
+bad_examples: []
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short spoken line written in {language_name}.'

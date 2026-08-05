@@ -1,0 +1,17 @@
+stage: proof
+language: ms
+language_name: Malay
+goal: "Bina kepercayaan: buktikan dakwaan tadi memang benar."
+tone: "Yakin, jujur, macam orang yang dah uji sendiri."
+rules:
+  - "Bukti guna pemakaian sebenar/ujian/butiran, bukan slogan."
+  - "Kekal pada main_selling_point sama, dari satu sudut jelas."
+  - "Ayat pendek dan padat."
+  - "Jangan ulang ayat value sebijik."
+good_examples:
+  - "Tarik ikan ni pun masih licin"
+  - "Dah diuji, memang licin macam ni"
+bad_examples:
+  - "Memang bagus"        # tiada bukti
+  - "Spesifikasi hebat"   # spesifikasi lagi
+output_format: 'Balas JSON sahaja: {"caption": "..."} — satu ayat pendek dalam {language_name}.'

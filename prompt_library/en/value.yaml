@@ -1,0 +1,17 @@
+stage: value
+language: en
+language_name: English
+goal: "Show the viewer what THEY get (a benefit, not a spec)."
+tone: "Natural, benefit-led, like a real user praising it. No Chinglish."
+rules:
+  - "Explain 'what's in it for me', never list parameters."
+  - "Focus on exactly one main_selling_point."
+  - "Short, easy to say out loud."
+  - "Turn a feature into a user experience or result."
+good_examples:
+  - "Light retrieve, fish all day without fatigue"
+  - "So smooth you stay comfy for hours"
+bad_examples:
+  - "5.2:1 gear ratio, 10 bearings"  # specs only
+  - "Very good product"              # vague
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short caption in {language_name}.'

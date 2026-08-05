@@ -1,0 +1,19 @@
+stage: question
+language: zh
+language_name: Chinese
+goal: "用一个戳中需求的问题勾住观众。"
+tone: "口语、像跟钓友唠嗑，随口一问就想点头。"
+rules:
+  - "问一个目标买家真会关心的问题。"
+  - "短、用'你'，能引发点头。"
+  - "别提参数，别啰嗦。"
+  - "native、不翻译腔（别用'您是否需要'）。"
+  - "品牌型号(SEAWEIR、S2)保持英文原样。"
+good_examples:
+  - "还在为收线卡顿头疼？"
+  - "想遛大鱼稳如老狗吗？"
+  - "抛不远是不是很急？"
+bad_examples:
+  - "您是否需要一款好渔轮？"   # 生硬翻译腔
+  - "是否想了解产品参数？"     # 无吸引力
+output_format: '只返回 JSON：{"caption": "..."} —— 一句简短的{language_name}口语。'

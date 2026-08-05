@@ -1,0 +1,13 @@
+# Speech Knowledge Base — Chinese (zh)
+#
+# 用途：仅用于 TTS（MiniMax）配音。字幕/页面显示永远用 caption（保持英文品牌 SEAWEIR 不变）。
+# 作用：把英文品牌换成中文读音，避免 MiniMax 逐字母念 "S-E-A-W-E-I-R"。
+#
+# word_boundary: ascii —— 品牌是嵌在中文里的拉丁词（如 "用SEAWEIR"、"这SEAWEIR"），
+#   用 ASCII 边界匹配：紧邻的中文字符不会挡住命中；仍避免 "S2" 命中 "S20"/"XS2"。
+# 未在表内的词 -> 保留原样，绝不报错/中断配音。
+word_boundary: ascii
+
+terms:
+  # —— 品牌 ——
+  SEAWEIR: "西威"

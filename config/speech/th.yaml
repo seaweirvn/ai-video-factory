@@ -1,0 +1,6 @@
+# Speech Knowledge Base — Thai (th)
+# 仅用于 TTS 配音；字幕永远用英文原文。English -> 泰语本地读音。
+# 匹配：整词、大小写不敏感、长词优先；缺失则保留 LLM 的 tts_text 原样。
+terms: {}
+  # SEAWEIR: "..."
+  # S2: "..."

@@ -1,0 +1,20 @@
+stage: proof
+language: zh
+language_name: Chinese
+goal: "建立信任：证明刚才那个卖点是真的。"
+tone: "笃定、接地气，像亲自实测过、爆过护的老钓友。绝不翻译腔。"
+rules:
+  - "用真实使用/实测/细节来证明，别喊口号。"
+  - "紧扣同一个 main_selling_point，从一个具体角度证明。"
+  - "短而有分量。"
+  - "别把上一句卖点原样重复。"
+  - "品牌型号(SEAWEIR、S2)保持英文原样。"
+good_examples:
+  - "遛这条大的照样丝滑"
+  - "实测中鱼，全程一点不卡"
+  - "连干一下午，手感没垮"
+bad_examples:
+  - "真的很好用"       # 没证据
+  - "参数更加优越"     # 又是参数
+  - "品质值得信赖"     # 空口号、翻译腔
+output_format: '只返回 JSON：{"caption": "..."} —— 一句简短的{language_name}口语。'

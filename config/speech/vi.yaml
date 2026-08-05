@@ -1,0 +1,124 @@
+# Speech Knowledge Base — Vietnamese (vi)
+#
+# 用途：仅用于 TTS（MiniMax）配音。字幕/页面显示永远用 caption（保持英文品牌/型号不变）。
+# 作用：把英文「品牌 / 型号 / 鱼线 / 渔轮术语 / 技术名词 / 单位 / 数字 / 竞品 / 平台词」
+#       换成越南本地自然读音（口播拼读）。
+#
+# 匹配规则（Speech Formatter 实现，非简单 replace）：
+#   - 整词匹配：左边不是字母、右边不是字母或数字才算命中
+#     （"S2" 不会命中 "S20"；但 "30mm"/"5kg"/"8+1" 这类「数字+单位」也能命中）；
+#   - 大小写不敏感；多词短语 / 长词优先；
+#   - 知识库没有的词 -> 保留 LLM 生成的 tts_text 原样，绝不报错/中断。
+
+terms:
+  # —— 一、品牌 ——
+  SEAWEIR: "Xi Quơ"
+
+  # —— 二、产品型号 ——
+  S1: "Ét Một"
+  S2: "Ét Hai"
+  S5: "Ét Năm"
+  S6: "Ét Sáu"
+  S7: "Ét Bảy"
+  S8: "Ét Tám"
+  S9: "Ét Chín"
+  Z1: "Dét Một"
+  Z2: "Dét Hai"
+  Z5: "Dét Năm"
+  V1: "Vê Một"
+  V2: "Vê Hai"
+  V3: "Vê Ba"
+  V5: "Vê Năm"
+  V6: "Vê Sáu"
+  V7: "Vê Bảy"
+  N1: "En Một"
+  N2: "En Hai"
+  N5: "En Năm"
+  N6: "En Sáu"
+  N7: "En Bảy"
+  X1: "Ích Một"
+  X2: "Ích Hai"
+  X3: "Ích Ba"
+
+  # —— 三、鱼线类型 ——
+  PE: "Pi Ê"
+  Nylon: "Nai Lông"
+  Leader: "Lít Đơ"
+  FC: "Ép Xi"
+  Mono: "Mô Nô"
+  Braid: "Brây"
+  "Braided Line": "Dây Bện"
+
+  # —— 四、渔轮专业词 ——
+  Drag: "Đờ-rác"
+  Rotor: "Rô Tơ"
+  Spool: "Spun"
+  Bearing: "Bi"
+  "Ball Bearing": "Bi"
+  Gear: "Bánh Răng"
+  Handle: "Tay Quay"
+  Knob: "Núm Tay Quay"
+  Bail: "Càng Máy"
+  "Main Shaft": "Trục Chính"
+  "Line Roller": "Con Lăn Dây"
+  Body: "Thân Máy"
+  Frame: "Khung"
+  "Side Plate": "Nắp Hông"
+  Pinion: "Bánh Răng Chủ Động"
+  "Drive Gear": "Bánh Răng Chính"
+
+  # —— 五、技术名词 ——
+  DC: "Đi Xi"
+  ABS: "Ây Bi Ét"
+  HG: "Hát Gi"
+  PG: "Pi Gi"
+  XH: "Ích Hát"
+  BB: "Bi"
+  CNC: "Xi En Xi"
+  Carbon: "Các Bon"
+  Metal: "Kim Loại"
+  Aluminum: "Nhôm"
+  Graphite: "Graphite"
+  Titanium: "Titan"
+  "Stainless Steel": "Thép Không Gỉ"
+
+  # —— 六、单位 ——
+  mm: "Mi Li Mét"
+  cm: "Xen Ti Mét"
+  m: "Mét"
+  kg: "Ki Lô"
+  LB: "Pao"
+  g: "Gam"
+  oz: "Ao"
+  RPM: "Vòng Phút"
+
+  # —— 七、数字（传动比 / 轴承数）——
+  "8+1": "Tám Cộng Một"
+  "7+1": "Bảy Cộng Một"
+  "6+1": "Sáu Cộng Một"
+  "5+1": "Năm Cộng Một"
+  "7.2:1": "Bảy Chấm Hai Trên Một"
+  "6.3:1": "Sáu Chấm Ba Trên Một"
+  "5.2:1": "Năm Chấm Hai Trên Một"
+
+  # —— 八、竞品品牌 ——
+  Shimano: "Shi Ma Nô"
+  Daiwa: "Đai Oa"
+  "Abu Garcia": "A Bu Ga Xi A"
+  "Major Craft": "Mây Dơ Cráp"
+  YGK: "Oai Gi Kây"
+  Stella: "Xờ Te La"
+  "Twin Power": "Tuyn Pao"
+  Vanford: "Van Phót"
+  Exist: "Ếch Xít"
+  Certate: "Xơ Ta Tê"
+  Tatula: "Ta Tu La"
+
+  # —— 九、TikTok / 电商常见词 ——
+  TikTok: "Tích Tóc"
+  Shopee: "So Pi"
+  Livestream: "Lai Chim"
+  Voucher: "Vao Chơ"
+  COD: "Xi Ô Đi"
+  "Flash Sale": "Phờ Lát Xeo"
+  Combo: "Com Bô"

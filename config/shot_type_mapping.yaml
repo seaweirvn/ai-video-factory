@@ -1,0 +1,38 @@
+# 飞书素材「素材类型」(中文) -> shot_priority.yaml 里的镜头枚举(英文)。
+#
+# 一个素材类型可满足多个镜头枚举（如「中鱼过程」既是 strong_action 又是 pulling_fish/real_use/catch）。
+# 选材时：某素材在某 stage 的得分 = 它覆盖的枚举里，在该 stage priority 列表中最靠前的名次。
+# key 依据 698 条素材实际「素材类型」取值补全；新增类型在此加一行即可，无需改代码。
+# 大小写不敏感 + 去空白精确匹配，命中不到则该素材在该 stage 记 0 分（仍可作填充）。
+
+mapping:
+  "手持展示": [product_clear, operation_obvious, stable_shot, full_product]
+  "空摇展示": [idle_swing, stable_shot]
+  "收线动作": [operation_obvious, real_use, core_point_match, strong_action]
+  "顺滑展示": [core_point_match, point_clear, operation_obvious]
+  "溜鱼过程": [pulling_fish, strong_action, real_use, catch]
+  "中鱼过程": [pulling_fish, strong_action, real_use, catch]
+  "中鱼瞬间": [strong_action, pulling_fish, catch]
+  "爆口瞬间": [strong_action, pulling_fish, catch]
+  "控鱼动作": [pulling_fish, real_use, strong_action]
+  "手持鱼获": [catch, pulling_fish, product_clear]
+  "大鱼展示": [catch, pulling_fish]
+  "鱼获展示": [catch, full_product]
+  "标准抛投": [casting, real_use]
+  "抛投动作": [casting, strong_action, operation_obvious]
+  "轻松抛投": [casting, real_use]
+  "水库作钓": [real_use, long_use]
+  "岸边作钓": [real_use]
+  "河边作钓": [real_use]
+  "泄力测试": [test_shot, real_use, core_point_match]
+  "电子秤称重": [test_shot]
+  "泄力声音": [test_shot, point_clear]
+  "产品主视觉": [product_closeup, product_clear, full_product, brand_exposure]
+  "泄力旋钮": [product_closeup, multi_angle_detail, point_clear]
+  "半陶瓷轴承": [product_closeup, multi_angle_detail, point_clear]
+  "半陶瓷轴承展示": [product_closeup, multi_angle_detail, point_clear]
+  "排线特写": [product_closeup, multi_angle_detail, point_clear]
+  "金属线杯": [product_closeup, multi_angle_detail]
+  "环境空镜": [high_quality]
+  "岸边环境": [high_quality]
+  "#场景": [high_quality]

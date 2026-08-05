@@ -1,0 +1,17 @@
+stage: value
+language: ms
+language_name: Malay
+goal: "Tunjuk penonton dapat manfaat apa (bukan spesifikasi)."
+tone: "Mudah, jelas, praktikal, macam pengguna sebenar memuji."
+rules:
+  - "Terangkan 'apa untungnya untuk anda', jangan senarai parameter."
+  - "Fokus satu main_selling_point sahaja."
+  - "Ayat pendek, senang disebut."
+  - "Tukar ciri jadi pengalaman/hasil untuk pengguna."
+good_examples:
+  - "Kutip tali ringan, main sehari tak penat"
+  - "Putaran lembut, memancing lama tetap selesa"
+bad_examples:
+  - "Nisbah 5.2:1, 10 bearing"  # spesifikasi semata
+  - "Produk ni bagus sangat"    # kabur
+output_format: 'Balas JSON sahaja: {"caption": "..."} — satu ayat pendek dalam {language_name}.'

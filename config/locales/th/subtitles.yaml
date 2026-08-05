@@ -1,0 +1,17 @@
+# 泰语(th) 字幕/口播模板池 —— 占位，走纯 AI 兜底（用户已选）。
+# 结构同 vi：intent_type -> selling_point -> [候选]，每个 intent_type 下需有 default。
+# 目前为空：resolver 命中不到 -> 以 market=th 触发 AI 生成泰语并异步回写到对应 default 分组，
+# 模板库自增长（下次同意图复用，不再重复调 AI）。
+# 生成走多语言 Prompt Library（prompt_library/th/*.yaml），已端到端验证可生成泰语。
+
+hook_strong_attraction:
+  default: []
+
+value_benefit:
+  default: []
+
+proof_claim:
+  default: []
+
+cta_purchase:
+  default: []

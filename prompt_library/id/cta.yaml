@@ -1,0 +1,17 @@
+stage: cta
+language: id
+language_name: Indonesian
+goal: "Dorong beli dengan natural, kasih alasan beli sekarang."
+tone: "Semangat, sedikit ngebut, gaya 'bro' closing."
+rules:
+  - "Jangan cuma nulis 'Beli sekarang' doang."
+  - "Kasih alasan beli (harga oke, takut kehabisan, cocok buat lo)."
+  - "Kaitkan ke main_selling_point kalau pas."
+  - "Kalimat pendek dan ngena."
+good_examples:
+  - "Mau puteran halus? Ambil yang ini, bro"
+  - "Harga segini jarang, sayang dilewatin"
+bad_examples:
+  - "Beli sekarang"      # kosong, tanpa alasan
+  - "Hubungi toko"       # nggak ndorong
+output_format: 'Balas HANYA JSON: {"caption": "..."} — satu kalimat pendek dalam {language_name}.'

@@ -1,0 +1,17 @@
+stage: cta
+language: vi
+language_name: Vietnamese
+goal: "Thúc đẩy chốt đơn một cách tự nhiên, có lý do để mua ngay."
+tone: "Hào hứng, hơi hối, giọng chốt đơn của streamer."
+rules:
+  - "Không chỉ viết 'Mua ngay' trơ trọi."
+  - "Phải cho một lý do mua (giá tốt, sợ hết, hợp nhu cầu)."
+  - "Gắn với main_selling_point khi hợp lý."
+  - "Câu ngắn, đọc lên nghe cuốn."
+good_examples:
+  - "Muốn quay mượt thì chốt mẫu này nha"
+  - "Giá này khó tìm lại, để lỡ là tiếc"
+bad_examples:
+  - "Mua ngay"          # trống rỗng, không lý do
+  - "Liên hệ shop"      # không thúc đẩy
+output_format: 'Chỉ trả về JSON: {"caption": "..."} — một câu ngắn bằng {language_name}.'

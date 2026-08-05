@@ -1,0 +1,5 @@
+# Speech Knowledge Base — English (en)
+# 仅用于 TTS 配音；字幕永远用英文原文。英文母语一般无需改读音，按需覆盖特殊拼读。
+# 匹配：整词、大小写不敏感、长词优先；缺失则保留 LLM 的 tts_text 原样。
+terms: {}
+  # SEAWEIR: "Sea weir"

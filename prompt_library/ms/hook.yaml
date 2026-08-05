@@ -1,0 +1,18 @@
+stage: hook
+language: ms
+language_name: Malay
+goal: "Buat penonton berhenti skrol dalam saat pertama."
+tone: "Ringkas, jelas, praktikal. Bahasa santai TikTok."
+rules:
+  - "Maksimum 8 patah perkataan."
+  - "Bahasa lisan, mudah, natural."
+  - "Cetus rasa ingin tahu atau nak miliki serta-merta."
+  - "Tiada spesifikasi teknikal, tiada salam panjang."
+  - "Ketengahkan manfaat main_selling_point atau momen 'wow'."
+good_examples:
+  - "Putaran licin gila!"
+  - "Rasa tangan memang best!"
+bad_examples:
+  - "Ini reel S2 dengan bearing seramik"  # terlalu teknikal
+  - "Hai semua, hari ini kita review"     # mula lambat
+output_format: 'Balas JSON sahaja: {"caption": "..."} — satu ayat pendek dalam {language_name}.'

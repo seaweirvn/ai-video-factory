@@ -1,0 +1,49 @@
+# 卖点枚举「唯一权威源」。
+# 飞书镜头标签、Conversion Director 判定、字幕模板(subtitles.yaml) 全部对齐这套英文 key。
+# 业务代码里不允许出现裸的中文/越南语字符串判断 —— 一律先经 tag_mapping.yaml 归一到这里的 key。
+#
+# 本表 key 依据实际飞书素材「主标签/辅助标签」取值（698 条素材统计）梳理而来。
+# label_* 仅用于人读/日志，不参与逻辑。字幕模板缺该卖点时会自动回落 default 分组，不阻塞。
+
+default: smooth_retrieve   # 无法判定卖点时的兜底（顺滑是最高频主标签）
+
+points:
+  smooth_retrieve:
+    label_en: "Smooth / silky retrieve"
+    label_zh: "收线顺滑丝滑（顺滑/丝滑/高级摇感/低启动阻力）"
+  light_weight:
+    label_en: "Light weight"
+    label_zh: "轻量（轻量/轻量化转子/减重）"
+  strong_pull:
+    label_en: "Strong drag / big fish"
+    label_zh: "泄力大力（泄力/大鱼/控鱼）"
+  long_cast:
+    label_en: "Long casting"
+    label_zh: "抛投远（远投/抛投）"
+  stable:
+    label_en: "Stable performance"
+    label_zh: "稳定"
+  premium_look:
+    label_en: "Premium look & feel"
+    label_zh: "高级感/升级感/做工外观（升级感/高级感/机械美感/外观）"
+  beginner_friendly:
+    label_en: "Beginner friendly"
+    label_zh: "新手友好/易上手（入门/新手/操作轻松/泛用）"
+  semi_ceramic_bearing:
+    label_en: "Semi-ceramic bearing"
+    label_zh: "半陶瓷轴承配置"
+  precise_line_lay:
+    label_en: "Precise line lay"
+    label_zh: "精密排线（精密排线/排线整齐）"
+  metal_spool:
+    label_en: "Metal spool"
+    label_zh: "金属线杯/金属质感"
+  durable:
+    label_en: "Durable build"
+    label_zh: "耐用做工（耐用/做工/不变形/精密制造）"
+  catch_result:
+    label_en: "Real catch result"
+    label_zh: "鱼获战绩（鱼获/爆口/大鱼展示）"
+  drag_sound:
+    label_en: "Crisp drag sound"
+    label_zh: "泄力声/清脆声音（泄力声/声音报警）"

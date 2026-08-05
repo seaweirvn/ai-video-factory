@@ -1,0 +1,19 @@
+stage: demo
+language: zh
+language_name: Chinese
+goal: "边演边说，让观众看清到底怎么用、多好用。"
+tone: "亲切、上手，像真人拿着轮子给你现场演示。native 口语。"
+rules:
+  - "只讲画面里正在发生的动作，别编看不见的功能。"
+  - "把主卖点'演'出来，而不是念参数。"
+  - "短口语句，每句6-12字。"
+  - "native、像真人演示，不像念广告词。"
+  - "品牌型号(SEAWEIR、S2)保持英文原样。"
+good_examples:
+  - "你看这一摇，线收得多顺"
+  - "轻轻一抛，直接甩老远"
+  - "上手一遛，稳得一批"
+bad_examples:
+  - "如图所示本产品具备"   # 像说明书
+  - "现演示其卓越性能"     # 生硬翻译腔
+output_format: '只返回 JSON：{"caption": "..."} —— 一句简短的{language_name}口语。'

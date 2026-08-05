@@ -1,0 +1,20 @@
+stage: solution
+language: zh
+language_name: Chinese
+goal: "把产品作为痛点的解法，围绕 main_selling_point。"
+tone: "笃定、让人安心，像老钓友掏出压箱底的家伙。native 口语。"
+rules:
+  - "把主卖点直接对应上刚才的痛点。"
+  - "让说法贴合画面正在演的东西。"
+  - "短口语句，每句6-12字。"
+  - "native、笃定，不浮夸、不翻译腔（别用'采用先进技术'）。"
+  - "不堆参数，先说体感好处。"
+  - "品牌型号(SEAWEIR、S2)保持英文原样。"
+good_examples:
+  - "换上 S2，收线立马丝滑"
+  - "这泄力一压，稳稳遛住"
+  - "轻轻一摇，线就乖乖回来"
+bad_examples:
+  - "该产品性能卓越可靠"       # 空泛、书面
+  - "采用先进技术解决方案"     # 翻译腔
+output_format: '只返回 JSON：{"caption": "..."} —— 一句简短的{language_name}口语。'

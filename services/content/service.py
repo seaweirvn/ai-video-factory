@@ -13,12 +13,24 @@ from pathlib import Path
 
 from loguru import logger
 
-from adapters.ai_providers import ContentProvider, get_content_provider
+from adapters.ai_providers import (
+    ContentContext,
+    ContentPack,
+    ContentProvider,
+    SceneContext,
+    get_content_provider,
+)
 from adapters.feishu import FeishuBitableClient, make_feishu_client
 from app.config import get_settings
+from core.enums import MaterialRole
 from core.feishu_fields import RENDER_FIELD_TYPES, RENDER_FIELDS
-from core.models import Material
-from services.library import MaterialRepository, get_material_repository
+from core.models import Material, RenderPlan
+from services.library import (
+    MaterialRepository,
+    ProductRepository,
+    get_material_repository,
+    get_product_repository,
+)
 
 
 class ContentService:
@@ -30,9 +42,13 @@ class ContentService:
         language: str,
         render_feishu: FeishuBitableClient | None = None,
         render_table_id: str = "",
+        product_repository: ProductRepository | None = None,
+        country: str = "VN",
     ) -> None:
         self.provider = provider
         self.repository = repository
+        self.product_repository = product_repository
+        self.country = country
         self.mappings_dir = Path(mappings_dir)
         self.language = language
         self.render_feishu = render_feishu
@@ -65,11 +81,95 @@ class ContentService:
         content["context"] = {"product_model": product, "tags": tags, "role_summary": role_summary}
         return content
 
-    def write_to_render(self, record_id: str, content: dict) -> dict:
-        if not (self.render_feishu and self.render_table_id):
+    def build_context(
+        self,
+        plan: RenderPlan,
+        *,
+        language: str | None = None,
+        target_sec: float = 25.0,
+        emotion: str = "live",
+        country: str | None = None,
+    ) -> ContentContext:
+        """从成片计划的真实片段 + 产品中心，组装 GPT 文案上下文（接地用）。
+
+        主画面默认取 HOOK（定调整片角度），并给出有序 scenes 让口播贴合画面顺序。
+        """
+        lookup = self._material_lookup()
+        scenes: list[SceneContext] = []
+        for c in plan.clips:
+            m = lookup.get(c.record_id)
+            scenes.append(
+                SceneContext(
+                    role=c.role_used.value,
+                    material_type=m.material_type if m else "",
+                    shooting_content=m.shooting_content if m else "",
+                    main_tag=m.main_tag if m else "",
+                    aux_tags=list(m.aux_tags) if m else [],
+                )
+            )
+        primary = next(
+            (s for s in scenes if s.role == MaterialRole.hook.value),
+            scenes[0] if scenes else SceneContext(),
+        )
+        secondary: list[str] = []
+        for s in scenes:
+            for t in s.aux_tags:
+                if t and t not in secondary:
+                    secondary.append(t)
+
+        profile = None
+        if self.product_repository:
+            profile = self.product_repository.get(plan.product_model)
+
+        return ContentContext(
+            product_model=plan.product_model,
+            product_positioning=profile.positioning if profile else "",
+            target_audience=profile.target_audience if profile else "",
+            product_selling_points=list(profile.selling_points) if profile else [],
+            forbidden_words=list(profile.forbidden_words) if profile else [],
+            material_type=primary.material_type,
+            shooting_content=primary.shooting_content,
+            primary_tag=primary.main_tag,
+            secondary_tags=secondary[:8],
+            scenes=scenes,
+            country=country or self.country,
+            language=language or self.language,
+            target_sec=target_sec,
+            emotion=emotion,
+        )
+
+    def generate_pack(
+        self, ctx: ContentContext, *, want_segments: bool = True
+    ) -> ContentPack:
+        return self.provider.generate_content_pack(ctx, want_segments=want_segments)
+
+    def write_pack(
+        self,
+        record_id: str,
+        pack: ContentPack,
+        *,
+        feishu: FeishuBitableClient | None = None,
+        table_id: str = "",
+    ) -> dict:
+        return self.write_to_render(
+            record_id,
+            {"title": pack.title, "caption": pack.caption, "tags": pack.hashtags},
+            feishu=feishu,
+            table_id=table_id,
+        )
+
+    def write_to_render(
+        self,
+        record_id: str,
+        content: dict,
+        *,
+        feishu: FeishuBitableClient | None = None,
+        table_id: str = "",
+    ) -> dict:
+        f = feishu or self.render_feishu
+        tid = table_id or self.render_table_id
+        if not (f and tid):
             raise RuntimeError("未配置成片表（FEISHU_VN_RENDER_APP_TOKEN / _TABLE_ID）")
-        f = self.render_feishu
-        tid = self.render_table_id
         values = {
             "title": content.get("title", ""),
             "caption": content.get("caption", ""),
@@ -126,4 +226,6 @@ def get_content_service() -> ContentService:
         language=s.content_language,
         render_feishu=render_feishu,
         render_table_id=s.feishu_vn_render_table_id,
+        product_repository=get_product_repository(),
+        country=s.content_country,
     )

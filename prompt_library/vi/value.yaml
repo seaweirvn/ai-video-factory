@@ -1,0 +1,17 @@
+stage: value
+language: vi
+language_name: Vietnamese
+goal: "Cho người xem thấy họ được lợi gì (không phải thông số)."
+tone: "Khẩu ngữ, gần gũi, giọng người dùng thật khen sản phẩm."
+rules:
+  - "Nói 'dùng vào thấy lợi gì', không đọc thông số."
+  - "Chỉ tập trung đúng một main_selling_point."
+  - "Câu ngắn, dễ đọc thành lời."
+  - "Biến tính năng thành trải nghiệm/kết quả cho người dùng."
+good_examples:
+  - "Thu dây nhẹ, câu cả ngày không mỏi tay"
+  - "Quay êm nên đánh lâu vẫn khỏe re"
+bad_examples:
+  - "Tỉ số truyền 5.2:1, 10 ổ bi"   # chỉ là thông số
+  - "Sản phẩm rất tốt"             # chung chung
+output_format: 'Chỉ trả về JSON: {"caption": "..."} — một câu ngắn bằng {language_name}.'

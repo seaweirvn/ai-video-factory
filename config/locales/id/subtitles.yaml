@@ -1,0 +1,14 @@
+# 印尼语(id) 字幕/口播模板池 —— 占位，待本地化。
+# 结构同 vi：intent_type -> selling_point -> [候选]，每个 intent_type 下需有 default。
+
+hook_strong_attraction:
+  default: []
+
+value_benefit:
+  default: []
+
+proof_claim:
+  default: []
+
+cta_purchase:
+  default: []

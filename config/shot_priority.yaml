@@ -1,0 +1,40 @@
+# 镜头选择优先级规则（跨市场通用，不含文案）。
+# - shot_type: 写入 Storyboard 的 shot_type 语义描述（英文，稳定）。
+# - priority : 该 stage 选镜头时的偏好顺序（枚举 key，越靠前越优先）。
+#              这些 key 后续与飞书「素材类型/主标签」经 tag_mapping 归一后的语义对齐；
+#              当前 director 只用于打分/排序提示，缺失不阻塞。
+hook:
+  shot_type: "strong action / product close-up"
+  priority:
+    - strong_action        # 动作强
+    - product_closeup      # 产品特写
+    - pulling_fish         # 拉鱼瞬间
+    - idle_swing           # 空摇
+    - casting              # 抛投瞬间
+    - high_quality         # 高质量画面
+
+value:
+  shot_type: "hand operation / retrieve"
+  priority:
+    - core_point_match     # 核心卖点匹配
+    - product_clear        # 产品清晰
+    - operation_obvious    # 操作明显
+    - stable_shot          # 镜头稳定
+
+proof:
+  shot_type: "real fishing / drag / close-up"
+  priority:
+    - real_use             # 实战镜头
+    - test_shot            # 测试镜头
+    - comparison           # 对比镜头
+    - multi_angle_detail   # 多角度细节
+    - long_use             # 长时间使用
+
+cta:
+  shot_type: "product beauty shot"
+  priority:
+    - catch                # 渔获
+    - full_product         # 产品完整展示
+    - brand_exposure       # 品牌露出
+    - point_clear          # 商品卖点清晰
+    - reason_clear         # 购买理由明确

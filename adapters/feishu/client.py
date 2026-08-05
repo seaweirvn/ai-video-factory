@@ -218,6 +218,13 @@ class FeishuBitableClient:
         )
         return payload.get("data", {}).get("record", {})
 
+    def delete_record(self, table_id: str, record_id: str) -> bool:
+        payload = self._request(
+            "DELETE",
+            f"/bitable/v1/apps/{self.app_token}/tables/{table_id}/records/{record_id}",
+        )
+        return bool(payload.get("data", {}).get("deleted", True))
+
 
 @lru_cache
 def get_feishu_client() -> FeishuBitableClient:

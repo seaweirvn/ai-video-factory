@@ -1,0 +1,13 @@
+stage: value
+language: default
+language_name: the target language
+goal: "Show the viewer what THEY get (a benefit, not a spec)."
+tone: "Natural, benefit-led, like a real user. Adapt to the target language and country."
+rules:
+  - "Explain 'what's in it for me', never list parameters."
+  - "Focus on exactly one main_selling_point."
+  - "Short, easy to say out loud."
+  - "Turn a feature into a user experience or result."
+good_examples: []
+bad_examples: []
+output_format: 'Return ONLY JSON: {"caption": "..."} — one short caption written in {language_name}.'

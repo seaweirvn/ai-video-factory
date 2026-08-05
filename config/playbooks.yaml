@@ -1,0 +1,128 @@
+# Director Engine 结构库（不写死结构）。
+#
+# - beats: beat 定义库。每个 beat 声明它用哪些角色的素材(roles)、字幕意图(intent_type)、
+#   语气(tone)、目标(goal)、镜头偏好(shots)、时长权重(weight)、单段镜头数(min/max_clips)。
+#   新 beat 借用现有 role 标注的素材，无需重新打标飞书。
+# - playbooks: 结构库。每个结构 = 一串 beat 名。加结构 = 加一段 YAML，零改代码。
+# - 时长：Director 按 variant 选总时长(full/compact)，再按各 beat.weight 归一切分到时间槽。
+# - 默认 hook_value_proof_cta 复现现有 structure.yaml 的四段基线。
+
+default_playbook: hook_value_proof_cta
+
+# 可用素材总时长 >= 阈值用 full，否则 compact
+min_full_material_sec: 18
+variants:
+  full:
+    total: 25
+  compact:
+    total: 15
+
+# —— beat 定义库 ——
+beats:
+  hook:
+    roles: [HOOK]
+    intent_type: hook_strong_attraction
+    tone: excited
+    goal: "stop scrolling"
+    weight: 3
+    max_clips: 1
+    min_sec: 1
+    max_sec: 2
+    shots: [strong_action, product_closeup, pulling_fish, idle_swing, casting, high_quality]
+
+  value:
+    roles: [VALUE]
+    intent_type: value_benefit
+    tone: friendly
+    goal: "show user benefit"
+    weight: 7
+    max_clips: 1
+    min_sec: 3
+    max_sec: 6
+    shots: [core_point_match, product_clear, operation_obvious, stable_shot]
+
+  proof:
+    roles: [PROOF]
+    intent_type: proof_claim
+    tone: confident
+    goal: "prove the claim"
+    weight: 10
+    max_clips: 1
+    min_sec: 4
+    max_sec: 10
+    shots: [real_use, test_shot, comparison, multi_angle_detail, long_use]
+
+  cta:
+    roles: [CTA]
+    intent_type: cta_purchase
+    tone: urgent
+    goal: "drive purchase"
+    weight: 5
+    max_clips: 1
+    min_sec: 2
+    max_sec: 5
+    shots: [catch, full_product, brand_exposure, point_clear, reason_clear]
+
+  # —— 扩展 beats（配套 prompt_library/<lang>/<intent_type>.yaml；缺失回落通用 prompt）——
+  question:
+    roles: [HOOK]
+    intent_type: question
+    tone: curious
+    goal: "provoke curiosity with a question"
+    weight: 3
+    max_clips: 1
+    min_sec: 1
+    max_sec: 3
+    shots: [strong_action, product_closeup, high_quality, pulling_fish]
+
+  demo:
+    roles: [VALUE]
+    intent_type: demo
+    tone: friendly
+    goal: "show the product in action"
+    weight: 8
+    max_clips: 1
+    min_sec: 3
+    max_sec: 8
+    shots: [operation_obvious, core_point_match, product_clear, real_use, stable_shot]
+
+  problem:
+    roles: [HOOK, VALUE]
+    intent_type: problem
+    tone: empathetic
+    goal: "name the pain the viewer feels"
+    weight: 4
+    max_clips: 1
+    min_sec: 2
+    max_sec: 5
+    shots: [strong_action, operation_obvious, high_quality]
+
+  solution:
+    roles: [VALUE, PROOF]
+    intent_type: solution
+    tone: confident
+    goal: "present the product as the fix"
+    weight: 8
+    max_clips: 1
+    min_sec: 3
+    max_sec: 8
+    shots: [core_point_match, operation_obvious, real_use, product_clear]
+
+# —— 结构库 ——
+playbooks:
+  hook_value_proof_cta:      # 默认：复现现有四段基线
+    beats: [hook, value, proof, cta]
+    emotion: desire
+    audio_mood: energetic
+  hook_proof_cta:            # 极短快节奏：钩子→硬证据→转化
+    beats: [hook, proof, cta]
+    emotion: urgency
+    audio_mood: energetic
+  question_demo_proof_cta:   # 提问→演示→证明→转化
+    beats: [question, demo, proof, cta]
+    emotion: curiosity
+    audio_mood: upbeat
+  problem_solution_demo_cta: # 痛点→方案→演示→转化
+    beats: [problem, solution, demo, cta]
+    emotion: trust
+    audio_mood: chill
